@@ -2,23 +2,16 @@
 #include "init.h"
 #include "RingBuffer.h"
 #include "sensors.h"
-
+#include "radiolink.h"
 #include "EERTOS.h"
-//Termopare https://hubstub.ru/stm32/141-izmerenie-temperatury-s-pomoschyu-termopary-na-primere-max6675-dlya-stm32.html
-//Gas http://catethysis.ru/stm32-mq135/
-//Preasure http://ziblog.ru/2013/03/15/bmp085-datchik-davleniya.html
-
 
 #define VERBOSE_OUTPUT
 
-
-
-DECLARE_TASK(T_HeartBit);
-
+uint8_t HostIDArr[] = {0x48, 0xFF, 0x6C, 0x06, 0x50, 0x77, 0x51, 0x49, 0x43, 0x35, 0x20, 0x87};//HOST ID
+bool IsMaster;
 
 FILE __stdout;
 FILE __stdin;
-
 #ifdef __GNUC__
   /* With GCC/RAISONANCE, small printf (option LD Linker->Libraries->Small printf
      set to 'Yes') calls __io_putchar() */
@@ -26,8 +19,6 @@ FILE __stdin;
 #else
   #define PUTCHAR_PROTOTYPE int fputc(int ch, FILE *f)
 #endif /* __GNUC__ */  
-  
-CircularBuffer RxBuff;
   
 int fputc(int ch, FILE *f) 
 {
@@ -37,9 +28,26 @@ int fputc(int ch, FILE *f)
     ITM_Port8(0) = ch;
   }*/
 	uart_send_char(USART1, ch);//Debug uart
-	uart_send_char(USART3, ch); //Radio uart
+//	uart_send_char(USART3, ch); //Radio uart
   return(ch);
-}
+}  
+
+
+DECLARE_TASK(T_HeartBit)
+{
+	static uint8_t t = 0;
+	if(IsMaster)
+	{
+		if(!t){PIN_ON(BOARD_LED);}
+		else{PIN_OFF(BOARD_LED);}
+	}
+	else //MAPPLE_LED
+	{
+		if(!t){PIN_ON(MAPPLE_LED);}
+		else{PIN_OFF(MAPPLE_LED);}
+	}
+	t = !t;
+}	 
 
 DECLARE_TASK(InfoOut_T)
 {
@@ -58,14 +66,13 @@ printf(" \r\n\r\n");
 	printf("TC T:%2.2f \r\n", TCoupleData); 
 	
 	if(dh_T == 0xFFFFFC00){ printf("DHT11 T: ---\r\n"); }
-		else { printf("DHT11 T: %i\r\n", dh_T); }
+	else { printf("DHT11 T: %i\r\n", dh_T); }
 	
-//	printf("MCU T:%2.2f \r\n", 0); 
 		
 	printf("---------Humidity---------\r\n"); 
 	
 	if(dh_H == 0xFFFFFC00){ printf("DHT11 H: ---\r\n"); }
-		else { printf("DHT11 H: %i\r\n", dh_H); }
+	else { printf("DHT11 H: %i\r\n", dh_H); }
 		
 	printf("---------Gas_level---------\r\n"); 	
 	printf("CO2:%d \r\n", co2); 
@@ -74,27 +81,80 @@ printf(" \r\n\r\n");
 
 #else
 		printf("$%d, %d, %d, %d, %d, %d;", (int)(DS_Arr[0]*100), (int)(TCoupleData*100), (int)(dh_T*100),(int)dh_H, (int)(co2), 1);
-		//printf("$%d, %d, %d;", DS18b20_temp, dh_H, co2);
 #endif // VERBOSE_OUTPUT	
 }	
 
-
+uint8_t data_buff[27];
 DECLARE_TASK(RadioRead_T)
 {
-	char t;
-	do
-	{
-		t = ReadByte(&RxBuff);
-		printf("%c", t);
-	}while(t != 0xFF);
+	/*char t;
+	t = ReadByte(&RxBuff);
+	if(t != 0xFF){printf("%c", t);}*/
+	RadioPack_t pack;
+	uint16_t i = 0;
+	__disable_irq();
+	
+	if(GetAmount(&RxBuff) >= 25) //full pack recieved!
+	{		
+		for(int i = 0; i<=26; i++)
+		{
+			data_buff[i] = ReadByte(&RxBuff);
+		}		
+		memcpy(&pack, data_buff, 25);
+		//MsgGet(&pack, data_buff);
+	}
+	__enable_irq();
+}
+DECLARE_TASK(RadioBroadcast_T)
+{
+	uint8_t data_buff[8];
+	for(int i = 0; i<8; i++){data_buff[i]=i;}	
+    MsgSend(0xBB, data_buff);
 }
 
+
+/*	
+$48
+$FF
+$6C
+$06
+$50
+$77
+$51
+$49
+$43
+$35
+$20
+$87
+$00
+$01
+$02
+$03
+$04
+$05
+$06
+$07
+$AA
+$00
+$00
+$00
+$99
+*/
 
 //TODO: add stm temperature + calibration
 //TODO: add vibro and butt IRQ
 //TODO: fix DHT_CS_ERROR for DHT
+
+// http://we.easyelectronics.ru/STM32/stm32-usart-na-preryvaniyah-na-primere-rs485.html 
 int main(void)
 {
+	uid_read(&HostID);
+	struct u_id idn;
+	memcpy(&idn, &HostIDArr, sizeof(HostIDArr));
+	
+    IsMaster = uid_cmp(&HostID, &idn);
+   
+	
 	ClearBuf(&RxBuff); 
 	Delay_Init();
 	
@@ -111,17 +171,28 @@ int main(void)
   __enable_irq ();
 
 	
+	 printf("%s\n", IsMaster ? "Master" : "Slave");
+
+	if(IsMaster)
+	{		
+		SetTimerTaskInfin(Ds18b20_Search, 0, 15000);
+		SetTimerTaskInfin(Ds18b20_ReguestTemp, 0, 1000);
+		SetTimerTaskInfin(TermoCoupe_Hndl, 0, 500);
+		SetTimerTaskInfin(Humidity_Hndl, 0, 1000);
+		SetTimerTaskInfin(GasSensor_Hndl, 0, 100);
+		SetTimerTaskInfin(VibroSensor_Hndl, 0, 1000);
+		
+	//	SetTimerTaskInfin(InfoOut_T, 0, 1500);
+		SetTimerTaskInfin(RadioRead_T, 0, 100);
+		//SetTimerTaskInfin(RadioBroadcast_T, 0, 1000);
+	}
+	else
+	{
+		PIN_CONFIGURATION(MAPPLE_LED);
+		SetTimerTaskInfin(RadioBroadcast_T, 0, 1000);
+	}
+	
 	SetTimerTaskInfin(T_HeartBit, 0, 1000);
-	SetTimerTaskInfin(Ds18b20_Search, 0, 15000);
-	SetTimerTaskInfin(Ds18b20_ReguestTemp, 0, 1000);
-	SetTimerTaskInfin(TermoCoupe_Hndl, 0, 500);
-	SetTimerTaskInfin(Humidity_Hndl, 0, 1000);
-	SetTimerTaskInfin(GasSensor_Hndl, 0, 100);
-	SetTimerTaskInfin(VibroSensor_Hndl, 0, 1000);
-	
-	SetTimerTaskInfin(InfoOut_T, 0, 1500);
-	SetTimerTaskInfin(RadioRead_T, 0, 1500);
-	
 	
 	printf("Start......\r\n");	 
 
@@ -152,18 +223,11 @@ void USART1_IRQHandler(void)
     if ((USART1->SR & USART_FLAG_RXNE) != (u16)RESET)
     {		
        t = USART_ReceiveData(USART1);
-	   WriteByte(&RxBuff, t);
+	   //WriteByte(&RxBuff, t);
     }
 }
 
 
-void USART3_IRQHandler(void)
-{
-    if ((USART3->SR & USART_FLAG_RXNE) != (u16)RESET)
-    {
-      USART_ReceiveData(USART3);
-    }
-}
 /*********************************************************************************************************
       END FILE
 *********************************************************************************************************/

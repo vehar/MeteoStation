@@ -18,16 +18,12 @@ uint16_t getCO2Level()
 
 uint16_t Spi_Write_Data(uint16_t data)
 {
-	while(!(SPI2->SR & SPI_SR_TXE));//ждём пока опустошится Tx буфер
-	//CS_LOW   //активируем Chip Select
-	PIN_OFF(PB_1);
-	
+	while(!(SPI2->SR & SPI_SR_TXE));//ждём пока опустошится Tx буфер 
+	PIN_OFF(PB_1);//активируем Chip Select
 	SPI2->DR = data;   //отправляем данные  
 	while(!(SPI2->SR & SPI_SR_RXNE));//ждём пока придёт ответ
-	data = SPI2->DR;  //считываем полученные данные 
-	//CS_HIGH 	//деактивируем Chip Select  
-	PIN_ON(PB_1);
-	
+	data = SPI2->DR;  //считываем полученные данные 	 
+	PIN_ON(PB_1);//деактивируем Chip Select 	
   return data;   //возвращаем то, что прочитали
 }
 
@@ -49,25 +45,10 @@ unsigned char One_Wire_Error_Handle (unsigned char err)
 ////////////////////////////////////////////////////////////////////////////
 
 
-DECLARE_TASK(T_HeartBit)
-{
-	static uint8_t t = 0;
-	if(!t)
-	{
-		PIN_ON(BOARD_LED);
-	}
-	else
-	{
-		PIN_OFF(BOARD_LED);
-	}
-	t = !t;
-}	
-
-
 DECLARE_TASK(Ds18b20_Search)
 {
 	unsigned char cnt;
-	__disable_irq ();
+	__disable_irq();
 	
 #ifdef VERBOSE_OUTPUT	
 	printf("Checking 1-Wire bus...\r\n");
@@ -95,7 +76,7 @@ unsigned int temp[One_Wire_Device_Number_MAX];
 
 DECLARE_TASK(Ds18b20_ReguestTemp)
 {
-		__disable_irq ();
+	__disable_irq();
 
 #ifdef VERBOSE_OUTPUT		
 	printf("Starting convertion proccess...\r\n");
@@ -117,7 +98,7 @@ DECLARE_TASK(Ds18b20_ReguestTemp)
 
 DECLARE_TASK(Ds18b20_Hndl)
 {
-		__disable_irq ();
+	__disable_irq ();
 #ifdef VERBOSE_OUTPUT		
 	printf("\r\n Getting results...\r\n");
 	

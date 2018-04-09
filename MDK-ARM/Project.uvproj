@@ -463,6 +463,16 @@
               <FileType>1</FileType>
               <FilePath>..\USER\RingBuffer.c</FilePath>
             </File>
+            <File>
+              <FileName>sensors.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\USER\sensors.c</FilePath>
+            </File>
+            <File>
+              <FileName>radiolink.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\USER\radiolink.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

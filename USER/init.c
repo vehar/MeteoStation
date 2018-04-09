@@ -131,7 +131,7 @@ GPIO_InitStructure.GPIO_Pin = GPIO_Pin_13;					    //USER KEY A
   GPIO_Init(GPIOB, &GPIO_InitStructure);*/
 
 PIN_CONFIGURATION(PB_7);
-PIN_CONFIGURATION(BOARD_LED);
+PIN_CONFIGURATION(BOARD_LED); 
 //PIN_CONFIGURATION(LED2);
 
 PIN_CONFIGURATION(USER_KEY_A);
@@ -233,25 +233,9 @@ void USART_Configuration(void)
   USART_Cmd(USART1, ENABLE);
   
   //Radiolink uart
-/*  //USART2_TX -> PA2 , USART2_RX ->	PA3
+  //USART2_TX -> PA2 , USART2_RX ->	PA3
   
-  RCC_APB1PeriphClockCmd( RCC_APB1Periph_USART2,ENABLE); 
- GPIO_InitStructureTx.GPIO_Pin = GPIO_Pin_2;	         
-  GPIO_Init(GPIOA, &GPIO_InitStructureTx);		   
-
-
-  GPIO_InitStructureRx.GPIO_Pin = GPIO_Pin_3;	   
-  GPIO_Init(GPIOA, &GPIO_InitStructureRx);
-
- // GPIO_PinRemapConfig(GPIO_Remap_USART2, ENABLE);
-  USART_InitStructure.USART_BaudRate = 115200; //115200
-
-  USART_Init(USART2, &USART_InitStructure); 
-//  USART_ITConfig(USART2, USART_IT_RXNE, ENABLE);
-//  USART_ITConfig(USART2, USART_IT_TXE, ENABLE);
-   USART_Cmd(USART2, ENABLE);*/
-   
-    //USART3_TX -> PB10 , USART2_RX ->	PB11
+  //USART3_TX -> PB10 , USART2_RX ->	PB11
   RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART3, ENABLE); 
 	
   GPIO_InitStructureTx.GPIO_Pin = GPIO_Pin_10;	         
@@ -259,9 +243,14 @@ void USART_Configuration(void)
   GPIO_InitStructureRx.GPIO_Pin = GPIO_Pin_11;	   
   GPIO_Init(GPIOB, &GPIO_InitStructureRx);
   
+  	/* NVIC Configuration */
+	/* Enable the USARTx Interrupt */
+	NVIC_InitStructure.NVIC_IRQChannel = USART3_IRQn;
+	NVIC_Init(&NVIC_InitStructure);
+	
   USART_Init(USART3, &USART_InitStructure); 
   USART_ITConfig(USART3, USART_IT_RXNE, ENABLE);
-  USART_ITConfig(USART3, USART_IT_TXE, ENABLE);
+  //USART_ITConfig(USART3, USART_IT_TXE, ENABLE);
   USART_Cmd(USART3, ENABLE);
 }
 ///////////////////////////////////////////

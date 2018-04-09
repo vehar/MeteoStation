@@ -13,8 +13,12 @@
 #include "strings.h"
 #include "dht11.h"
 
-
 #include "EERTOS.h"
+
+//Termopare https://hubstub.ru/stm32/141-izmerenie-temperatury-s-pomoschyu-termopary-na-primere-max6675-dlya-stm32.html
+//Gas http://catethysis.ru/stm32-mq135/
+//Preasure http://ziblog.ru/2013/03/15/bmp085-datchik-davleniya.html
+
 
 #define PIN_LED					C, 9, HIGH, MODE_OUTPUT_PUSH_PULL, SPEED_2MHZ
 #define PIN_BUTTON				A, 0, HIGH, MODE_INPUT_FLOATING, SPEED_2MHZ
