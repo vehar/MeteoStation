@@ -1,3 +1,5 @@
+#include <stm32f10x.h>
+#include <stm32f10x_dma.h>
 #include "init.h"
 
 /////////////////////////////////
@@ -33,8 +35,8 @@ void Spi_Init(void)
 //включаем тактирование порта B и альтернативных функций 
 	RCC->APB2ENR  |= RCC_APB2ENR_IOPBEN | RCC_APB2ENR_AFIOEN;   
 	
-//13(SCK) и 15(MOSI) вывод - альтернативная функция  push pull, 14(MISO) вывод - Input floating, 10(CS) вывод - выход, push-pull
-	GPIOB->CRH &= ~(GPIO_CRH_CNF13_0 | GPIO_CRH_CNF15_0 | GPIO_CRH_CNF10_0);  
+//13(SCK) и 15(MOSI) вывод - альтернативная функция  push pull, 14(MISO) вывод - Input floating, 1(CS) вывод - выход, push-pull
+	GPIOB->CRH &= ~(GPIO_CRH_CNF13_0 | GPIO_CRH_CNF15_0 | GPIO_CRL_CNF1_0);  
 	GPIOB->CRH |= GPIO_CRH_CNF13_1 | GPIO_CRH_CNF15_1;  	
 	GPIOB->CRH |= GPIO_CRH_MODE10_0 | GPIO_CRH_MODE13_1 |	GPIO_CRH_MODE15_1;
 
@@ -61,8 +63,8 @@ void GPIO_Configuration(void)
         RCC_APB2ENR_IOPBEN |
         RCC_APB2ENR_IOPCEN |
         RCC_APB2ENR_IOPDEN |
-        RCC_APB2ENR_USART1EN |
-				RCC_APB2ENR_AFIOEN;
+	    //RCC_APB2ENR_USART1EN |
+		RCC_APB2ENR_AFIOEN;
 	
   RCC_APB2PeriphClockCmd( RCC_APB2Periph_GPIOA , ENABLE); 
   RCC_APB2PeriphClockCmd( RCC_APB2Periph_GPIOB , ENABLE); 	
@@ -147,27 +149,41 @@ void TIM_Configuration(void)
 
 void USART_Configuration(void)
 { 
-  GPIO_InitTypeDef GPIO_InitStructure;
+  GPIO_InitTypeDef GPIO_InitStructureTx;
+  GPIO_InitTypeDef GPIO_InitStructureRx;
+	
   USART_InitTypeDef USART_InitStructure; 
 	
+  //Debug uart
+	
   RCC_APB2PeriphClockCmd( RCC_APB2Periph_GPIOA | RCC_APB2Periph_USART1,ENABLE);
+  
   /*
   *  USART1_TX -> PA9 , USART1_RX ->	PA10
   */
 	//PIN_CONFIGURATION(USART1_TX); //MODE_AF_PUSH_PULL check it!!!
 	//PIN_CONFIGURATION(USART1_RX);
 //*	
-  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9;	         
-  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP; 
-  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz; 
-  GPIO_Init(GPIOA, &GPIO_InitStructure);		   
+  GPIO_InitStructureTx.GPIO_Pin = GPIO_Pin_9;	         
+  GPIO_InitStructureTx.GPIO_Mode = GPIO_Mode_AF_PP; 
+  GPIO_InitStructureTx.GPIO_Speed = GPIO_Speed_50MHz; 
+  GPIO_Init(GPIOA, &GPIO_InitStructureTx);		   
 
-  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_10;	        
-  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;  
-  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz; 
-  GPIO_Init(GPIOA, &GPIO_InitStructure);
+  GPIO_InitStructureRx.GPIO_Pin = GPIO_Pin_10;	        
+  GPIO_InitStructureRx.GPIO_Mode = GPIO_Mode_IN_FLOATING;  
+  GPIO_InitStructureRx.GPIO_Speed = GPIO_Speed_50MHz; 
+  GPIO_Init(GPIOA, &GPIO_InitStructureRx);
 //*/
-  USART_InitStructure.USART_BaudRate = 115200; //115200
+	/* NVIC Configuration */
+	NVIC_InitTypeDef NVIC_InitStructure;
+	/* Enable the USARTx Interrupt */
+	NVIC_InitStructure.NVIC_IRQChannel = USART1_IRQn;
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+	NVIC_Init(&NVIC_InitStructure);
+	
+  USART_InitStructure.USART_BaudRate = 9600; //115200
   USART_InitStructure.USART_WordLength = USART_WordLength_8b;
   USART_InitStructure.USART_StopBits = USART_StopBits_1;
   USART_InitStructure.USART_Parity = USART_Parity_No;
@@ -176,6 +192,39 @@ void USART_Configuration(void)
 
   USART_Init(USART1, &USART_InitStructure); 
   USART_ITConfig(USART1, USART_IT_RXNE, ENABLE);
-  USART_ITConfig(USART1, USART_IT_TXE, ENABLE);
+//  USART_ITConfig(USART1, USART_IT_TXE, ENABLE);
   USART_Cmd(USART1, ENABLE);
+  
+  //Radiolink uart
+/*  //USART2_TX -> PA2 , USART2_RX ->	PA3
+  
+  RCC_APB1PeriphClockCmd( RCC_APB1Periph_USART2,ENABLE); 
+ GPIO_InitStructureTx.GPIO_Pin = GPIO_Pin_2;	         
+  GPIO_Init(GPIOA, &GPIO_InitStructureTx);		   
+
+
+  GPIO_InitStructureRx.GPIO_Pin = GPIO_Pin_3;	   
+  GPIO_Init(GPIOA, &GPIO_InitStructureRx);
+
+ // GPIO_PinRemapConfig(GPIO_Remap_USART2, ENABLE);
+  USART_InitStructure.USART_BaudRate = 115200; //115200
+
+  USART_Init(USART2, &USART_InitStructure); 
+//  USART_ITConfig(USART2, USART_IT_RXNE, ENABLE);
+//  USART_ITConfig(USART2, USART_IT_TXE, ENABLE);
+   USART_Cmd(USART2, ENABLE);*/
+   
+    //USART3_TX -> PB10 , USART2_RX ->	PB11
+  RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART3, ENABLE); 
+	
+  GPIO_InitStructureTx.GPIO_Pin = GPIO_Pin_10;	         
+  GPIO_Init(GPIOB, &GPIO_InitStructureTx);		   
+  GPIO_InitStructureRx.GPIO_Pin = GPIO_Pin_11;	   
+  GPIO_Init(GPIOB, &GPIO_InitStructureRx);
+  
+  USART_Init(USART3, &USART_InitStructure); 
+  USART_ITConfig(USART3, USART_IT_RXNE, ENABLE);
+  USART_ITConfig(USART3, USART_IT_TXE, ENABLE);
+  USART_Cmd(USART3, ENABLE);
 }
+///////////////////////////////////////////

@@ -458,6 +458,11 @@
               <FileType>5</FileType>
               <FilePath>..\Libraries\GPIO\stm32_GPIO.h</FilePath>
             </File>
+            <File>
+              <FileName>RingBuffer.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\USER\RingBuffer.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

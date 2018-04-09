@@ -24,8 +24,8 @@
 #define One_Wire_Pin 		GPIOB, GPIO_Pin_9
 
 //////////
-#define	 CS_LOW 	GPIOB->BSRR = GPIO_BSRR_BR10;
-#define 	 CS_HIGH 	GPIOB->BSRR = GPIO_BSRR_BS10;
+#define	 CS_LOW 	GPIOB->BSRR = GPIO_BSRR_BR1;
+#define  CS_HIGH 	GPIOB->BSRR = GPIO_BSRR_BS1;
 
 //для SWO
 #define 	 ITM_Port8(n)    (*((volatile unsigned char *)(0xE0000000+4*n)))

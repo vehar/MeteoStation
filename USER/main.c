@@ -1,5 +1,6 @@
 #include "main.h"
 #include "init.h"
+#include "RingBuffer.h"
 
 #include "EERTOS.h"
 //Termopare https://hubstub.ru/stm32/141-izmerenie-temperatury-s-pomoschyu-termopary-na-primere-max6675-dlya-stm32.html
@@ -7,7 +8,7 @@
 //Preasure http://ziblog.ru/2013/03/15/bmp085-datchik-davleniya.html
 
 
-//#define VERBOSE_OUTPUT
+#define VERBOSE_OUTPUT
 
 
 DECLARE_TASK(VibroSensor_Hndl);
@@ -17,7 +18,7 @@ DECLARE_TASK(TermoCoupe_Hndl);
 DECLARE_TASK(Ds18b20_Hndl);
 DECLARE_TASK(Ds18b20_ReguestTemp);
 DECLARE_TASK(Ds18b20_Search);
-DECLARE_TASK(Blink);
+DECLARE_TASK(T_HeartBit);
 
 
 FILE __stdout;
@@ -31,7 +32,8 @@ FILE __stdin;
   #define PUTCHAR_PROTOTYPE int fputc(int ch, FILE *f)
 #endif /* __GNUC__ */  
   
-
+CircularBuffer RxBuff;
+  
 int fputc(int ch, FILE *f) 
 {
   /*if (DEMCR & TRCENA) // for SWO out
@@ -39,8 +41,8 @@ int fputc(int ch, FILE *f)
     while (ITM_Port32(0) == 0);
     ITM_Port8(0) = ch;
   }*/
-	uart_send_char(USART1, ch);
-	
+	uart_send_char(USART1, ch);//Debug uart
+	uart_send_char(USART3, ch); //Radio uart
   return(ch);
 }
 
@@ -87,7 +89,7 @@ unsigned char One_Wire_Error_Handle (unsigned char err)
 ////////////////////////////////////////////////////////////////////////////
 
 
-DECLARE_TASK(Blink)
+DECLARE_TASK(T_HeartBit)
 {
 	static uint8_t t = 0;
 	if(!t)
@@ -121,7 +123,7 @@ DECLARE_TASK(Ds18b20_Search)
 	{
 		unsigned char cnt2;
 		printf("Sensor %d  serial number: ", cnt);
-		for (cnt2=0; cnt2!=8; cnt2++) uart_print_hex_value (USART1, ROM_SN[cnt][cnt2]);
+	//	for (cnt2=0; cnt2!=8; cnt2++) uart_print_hex_value (USART1, ROM_SN[cnt][cnt2]);
 		printf("\r\n");
 	}
 #endif	
@@ -166,14 +168,16 @@ DECLARE_TASK(Ds18b20_Hndl)
 		printf("Sensor %d Temperature value: %d.%d *C\r\n", (cnt+1), (temp[cnt]>>4), (temp[cnt]&0x0F));
 	}
 #else
-		for (uint8_t cnt=0; cnt!=devices_cnt; cnt++)
+
+#endif	
+	for (uint8_t cnt=0; cnt!=devices_cnt; cnt++)
 	{
 		One_Wire_Error_Handle(DS1822_Get_Conversion_Result_by_ROM_CRC(One_Wire_Pin, &ROM_SN[cnt], &temp[cnt]));
 		DS18b20_temp =  (temp[cnt]>>4) + (float)((temp[cnt]&0x0F))/10;
 		DS_Arr[cnt] = DS18b20_temp;
 		//printf("DS:%d V:%d.%d \r\n", (cnt+1), (temp[cnt]>>4), (temp[cnt]&0x0F));
 	}
-#endif	
+	
 	__enable_irq ();
 }	
 
@@ -224,7 +228,9 @@ DECLARE_TASK(VibroSensor_Hndl)
 
 DECLARE_TASK(InfoOut_T)
 {
-	/*
+	
+#ifdef VERBOSE_OUTPUT	
+	
 printf(" \r\n\r\n"); 
 	
 	printf("---------Temperature---------\r\n"); 
@@ -250,10 +256,24 @@ printf(" \r\n\r\n");
 	printf("CO2:%d \r\n", co2); 
 	
 printf(" \r\n\r\n"); 		
-*/
+
+#else
 		printf("$%d, %d, %d, %d, %d, %d;", (int)(DS_Arr[0]*100), (int)(TCoupleData*100), (int)(dh_T*100),(int)dh_H, (int)(co2), 1);
 		//printf("$%d, %d, %d;", DS18b20_temp, dh_H, co2);
+#endif // VERBOSE_OUTPUT	
 }	
+
+
+DECLARE_TASK(RadioRead_T)
+{
+	char t;
+	do
+	{
+		t = ReadByte(&RxBuff);
+		printf("%c", t);
+	}while(t != 0xFF);
+}
+
 
 //http://www.avislab.com/blog/stm32-rtc/
 unsigned char RTC_Init(void)
@@ -293,10 +313,12 @@ unsigned char RTC_Init(void)
 //TODO: fix DHT_CS_ERROR for DHT
 int main(void)
 {
+	ClearBuf(&RxBuff); 
 	Delay_Init();
 	
 	GPIO_Configuration();
 	USART_Configuration();
+	
 	Spi_Init();
 	Adc_Init();
 	
@@ -307,7 +329,7 @@ int main(void)
   __enable_irq ();
 
 	
-	SetTimerTaskInfin(Blink, 0, 1000);
+	SetTimerTaskInfin(T_HeartBit, 0, 1000);
 	SetTimerTaskInfin(Ds18b20_Search, 0, 15000);
 	SetTimerTaskInfin(Ds18b20_ReguestTemp, 0, 1000);
 	SetTimerTaskInfin(TermoCoupe_Hndl, 0, 500);
@@ -315,16 +337,15 @@ int main(void)
 	SetTimerTaskInfin(GasSensor_Hndl, 0, 100);
 	SetTimerTaskInfin(VibroSensor_Hndl, 0, 1000);
 	
-	SetTimerTaskInfin(InfoOut_T, 0, 500);
+	SetTimerTaskInfin(InfoOut_T, 0, 1500);
+	SetTimerTaskInfin(RadioRead_T, 0, 1500);
 	
 	
 	printf("Start......\r\n");	 
 
 	Shedull(1);//зациклились через диспетчер
-	while(1)
-	{
-		// Fatal RTOS error
-	}
+	
+	while(1){}// Fatal RTOS error
 }
 
 
@@ -342,6 +363,25 @@ void TIM2_IRQHandler(void)
   }	
 }
 
+
+void USART1_IRQHandler(void)
+{
+	char t = 0;
+    if ((USART1->SR & USART_FLAG_RXNE) != (u16)RESET)
+    {		
+       t = USART_ReceiveData(USART1);
+	   WriteByte(&RxBuff, t);
+    }
+}
+
+
+void USART3_IRQHandler(void)
+{
+    if ((USART3->SR & USART_FLAG_RXNE) != (u16)RESET)
+    {
+      USART_ReceiveData(USART3);
+    }
+}
 /*********************************************************************************************************
       END FILE
 *********************************************************************************************************/
