@@ -21,11 +21,7 @@
 
 #include "..\Libraries\platform.h"
 
-#define One_Wire_Pin 		GPIOB, GPIO_Pin_9
 
-//////////
-#define	 CS_LOW 	GPIOB->BSRR = GPIO_BSRR_BR1;
-#define  CS_HIGH 	GPIOB->BSRR = GPIO_BSRR_BS1;
 
 //для SWO
 #define 	 ITM_Port8(n)    (*((volatile unsigned char *)(0xE0000000+4*n)))
@@ -44,7 +40,7 @@ struct __FILE { int handle;  };
 /* Private function prototypes -----------------------------------------------*/
 
 	
-unsigned char One_Wire_Error_Handle (unsigned char err);
+
 
 
 #endif /* MAIN_H_ */

@@ -1,0 +1,56 @@
+// sensors.h
+#include "macros.h"
+
+#include "stm32f10x.h"
+#include "stm32f10x_rcc.h"
+#include "stm32f10x_adc.h"
+#include "stm32f10x_i2c.h"
+#include <stdio.h>
+#include "DS1822.h"
+#include "serial.h"
+#include "systick.h"
+#include "GLCD.h"
+#include "strings.h"
+#include "dht11.h"
+
+
+#include "EERTOS.h"
+
+#define PIN_LED					C, 9, HIGH, MODE_OUTPUT_PUSH_PULL, SPEED_2MHZ
+#define PIN_BUTTON				A, 0, HIGH, MODE_INPUT_FLOATING, SPEED_2MHZ
+#define VIBRO_SENSOR_PIN		C, 0, HIGH, MODE_INPUT_FLOATING, SPEED_2MHZ
+#define BOARD_LED  A, 5, HIGH, MODE_OUTPUT_PUSH_PULL, SPEED_2MHZ	
+#define PB_1  B, 1, HIGH, MODE_OUTPUT_PUSH_PULL, SPEED_2MHZ	
+#define PB_7  B, 7, HIGH, MODE_OUTPUT_PUSH_PULL, SPEED_2MHZ		
+#define LED1  B, 0, HIGH, MODE_OUTPUT_PUSH_PULL, SPEED_2MHZ	
+#define LED2  B, 1, HIGH, MODE_OUTPUT_PUSH_PULL, SPEED_2MHZ	
+
+#define USER_KEY_A  C, 13, HIGH, MODE_INPUT_FLOATING, SPEED_2MHZ		
+#define USER_KEY_B  B, 2, HIGH, MODE_INPUT_FLOATING, SPEED_2MHZ	
+
+
+#define One_Wire_Pin 		GPIOB, GPIO_Pin_9
+
+//////////
+#define	 CS_LOW 	GPIOB->BSRR = GPIO_BSRR_BR1;
+#define  CS_HIGH 	GPIOB->BSRR = GPIO_BSRR_BS1;
+
+extern float DS18b20_temp;
+extern float TCoupleData;	
+extern int dh_T;
+extern int dh_H;
+extern uint16_t co2;
+extern uint8_t ROM_SN[One_Wire_Device_Number_MAX][DS1822_SERIAL_NUM_SIZE];
+extern uint8_t devices_cnt;
+extern float DS_Arr[128];
+
+uint16_t getCO2Level();
+unsigned char One_Wire_Error_Handle (unsigned char err);
+
+DECLARE_TASK(VibroSensor_Hndl);
+DECLARE_TASK(GasSensor_Hndl);
+DECLARE_TASK(Humidity_Hndl);
+DECLARE_TASK(TermoCoupe_Hndl);
+DECLARE_TASK(Ds18b20_Hndl);
+DECLARE_TASK(Ds18b20_ReguestTemp);
+DECLARE_TASK(Ds18b20_Search);

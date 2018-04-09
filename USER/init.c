@@ -2,6 +2,41 @@
 #include <stm32f10x_dma.h>
 #include "init.h"
 
+
+//http://www.avislab.com/blog/stm32-rtc/
+unsigned char RTC_Init(void)
+{
+    // Дозволити тактування модулів управління живленням і управлінням резервної областю
+    RCC_APB1PeriphClockCmd(RCC_APB1Periph_PWR | RCC_APB1Periph_BKP, ENABLE);
+    // Дозволити доступ до області резервних даних
+    PWR_BackupAccessCmd(ENABLE);
+    // Якщо годинник вимкнений - ініціалізувати
+    if ((RCC->BDCR & RCC_BDCR_RTCEN) != RCC_BDCR_RTCEN)
+    {
+        // Виконати скидання області резервних даних
+        RCC_BackupResetCmd(ENABLE);
+        RCC_BackupResetCmd(DISABLE);
+ 
+        // Вибрати джерелом тактових імпульсів зовнішній кварц 32768 і подати тактування
+        RCC_LSEConfig(RCC_LSE_ON);
+        while ((RCC->BDCR & RCC_BDCR_LSERDY) != RCC_BDCR_LSERDY) {}
+        RCC_RTCCLKConfig(RCC_RTCCLKSource_LSE);
+ 
+        RTC_SetPrescaler(0x7FFF); // Встановити поділювач, щоб годинник рахував секунди
+ 
+        // Вмикаємо годинник
+        RCC_RTCCLKCmd(ENABLE);
+ 
+        // Чекаємо на синхронізацію
+        RTC_WaitForSynchro();
+ 
+				//NVIC_EnableIRQ (RTC_IRQn);           //разрешить прерывания от RTC
+        return 1;
+    }
+    return 0;
+}
+
+
 /////////////////////////////////
 void Adc_Init()  
 {
@@ -52,6 +87,8 @@ void Spi_Init(void)
 	
     SPI2->CR1 |= SPI_CR1_MSTR;              //Mode Master
     SPI2->CR1 |= SPI_CR1_SPE;               //Enable SPI2
+	
+	PIN_CONFIGURATION(PB_1);
 }
 
 void GPIO_Configuration(void)
