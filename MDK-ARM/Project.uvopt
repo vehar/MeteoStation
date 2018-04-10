@@ -176,9 +176,9 @@
         <Bp>
           <Number>0</Number>
           <Type>0</Type>
-          <LineNumber>192</LineNumber>
+          <LineNumber>197</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134230566</Address>
+          <Address>134230694</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -187,39 +187,7 @@
           <BreakIfRCount>1</BreakIfRCount>
           <Filename>..\USER\main.c</Filename>
           <ExecCommand></ExecCommand>
-          <Expression>\\Project\../USER/main.c\192</Expression>
-        </Bp>
-        <Bp>
-          <Number>1</Number>
-          <Type>0</Type>
-          <LineNumber>72</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>134223122</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>..\USER\radiolink.c</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression>\\Project\../USER/radiolink.c\72</Expression>
-        </Bp>
-        <Bp>
-          <Number>2</Number>
-          <Type>0</Type>
-          <LineNumber>98</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>134224276</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>..\USER\main.c</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression>\\Project\../USER/main.c\98</Expression>
+          <Expression>\\Project\../USER/main.c\197</Expression>
         </Bp>
       </Breakpoint>
       <WatchWindow1>
@@ -327,6 +295,11 @@
           <count>20</count>
           <WinNumber>1</WinNumber>
           <ItemText>idn</ItemText>
+        </Ww>
+        <Ww>
+          <count>21</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>dustLvl</ItemText>
         </Ww>
       </WatchWindow1>
       <Tracepoint>

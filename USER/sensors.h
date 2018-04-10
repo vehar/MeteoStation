@@ -32,12 +32,17 @@
 #define USER_KEY_A  C, 13, HIGH, MODE_INPUT_FLOATING, SPEED_2MHZ		
 #define USER_KEY_B  B, 2, HIGH, MODE_INPUT_FLOATING, SPEED_2MHZ	
 
-
 #define One_Wire_Pin 		GPIOB, GPIO_Pin_9
 
 //////////
-#define	 CS_LOW 	GPIOB->BSRR = GPIO_BSRR_BR1;
-#define  CS_HIGH 	GPIOB->BSRR = GPIO_BSRR_BS1;
+//#define	 CS_LOW 	GPIOB->BSRR = GPIO_BSRR_BR1;
+//#define  CS_HIGH 	GPIOB->BSRR = GPIO_BSRR_BS1;
+
+//Mapple mini
+#define DUST_PIN_LED_GND  B, 9, HIGH, MODE_OUTPUT_PUSH_PULL, SPEED_2MHZ	
+#define DUST_PIN_LED_PWM  B, 8, HIGH, MODE_OUTPUT_PUSH_PULL, SPEED_2MHZ	
+#define DUST_PIN_ANALOG   A, 0, HIGH, MODE_INPUT_FLOATING, SPEED_2MHZ
+
 
 extern float DS18b20_temp;
 extern float TCoupleData;	
@@ -58,3 +63,5 @@ DECLARE_TASK(TermoCoupe_Hndl);
 DECLARE_TASK(Ds18b20_Hndl);
 DECLARE_TASK(Ds18b20_ReguestTemp);
 DECLARE_TASK(Ds18b20_Search);
+
+DECLARE_TASK(DustSensor_Hndl);

@@ -189,7 +189,13 @@ int main(void)
 	else
 	{
 		PIN_CONFIGURATION(MAPPLE_LED);
+		
+		PIN_CONFIGURATION(DUST_PIN_LED_GND);
+		PIN_CONFIGURATION(DUST_PIN_LED_PWM);
+		//PIN_CONFIGURATION(DUST_PIN_ANALOG);
+		
 		SetTimerTaskInfin(RadioBroadcast_T, 0, 1000);
+		SetTimerTaskInfin(DustSensor_Hndl, 0, 1000);
 	}
 	
 	SetTimerTaskInfin(T_HeartBit, 0, 1000);

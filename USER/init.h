@@ -37,6 +37,7 @@
 
 
 void Adc_Init();
+void ADC_DMA_init();
 void Spi_Init(void);
 void GPIO_Configuration(void);
 void SysTikConfig(void);

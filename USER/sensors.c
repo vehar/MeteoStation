@@ -5,6 +5,8 @@ float TCoupleData = 0;
 int dh_T = 0;
 int dh_H = 0;
 uint16_t co2 = 0;
+uint16_t dustLvl = 0;
+
 uint8_t ROM_SN[One_Wire_Device_Number_MAX][DS1822_SERIAL_NUM_SIZE];
 uint8_t devices_cnt = 0;
 float DS_Arr[128];
@@ -159,3 +161,22 @@ DECLARE_TASK(VibroSensor_Hndl)
 				
 		}
 }	
+
+DECLARE_TASK(DustSensor_Hndl)
+{
+	__disable_irq ();
+	PIN_OFF(DUST_PIN_LED_GND);
+	PIN_OFF(DUST_PIN_LED_PWM);
+	delay_ms(2);
+	
+	dustLvl = getCO2Level(); // B0
+	
+	delay_us(40);
+	PIN_ON(DUST_PIN_LED_GND);
+	PIN_ON(DUST_PIN_LED_PWM);
+	
+	//dustLvl = dustLvl*(3.3 / 1024) * 0.17 - 0.1;
+	
+	__enable_irq ();
+}
+
