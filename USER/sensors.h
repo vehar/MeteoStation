@@ -49,6 +49,9 @@ extern float TCoupleData;
 extern int dh_T;
 extern int dh_H;
 extern uint16_t co2;
+extern float internalTemp;
+extern uint16_t dustLvl;
+
 extern uint8_t ROM_SN[One_Wire_Device_Number_MAX][DS1822_SERIAL_NUM_SIZE];
 extern uint8_t devices_cnt;
 extern float DS_Arr[128];

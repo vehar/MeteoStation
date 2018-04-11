@@ -38,31 +38,6 @@ unsigned char RTC_Init(void)
 
 
 /////////////////////////////////
-void Adc_Init()  
-{
-	 //ADC settings
- ADC_InitTypeDef ADC_InitStructure;
-	
- RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1, ENABLE);
-
- ADC_StructInit(&ADC_InitStructure);
- ADC_InitStructure.ADC_Mode = ADC_Mode_Independent;
- ADC_InitStructure.ADC_ScanConvMode = ENABLE;
- ADC_InitStructure.ADC_ContinuousConvMode = DISABLE;
- ADC_InitStructure.ADC_ExternalTrigConv = ADC_ExternalTrigConv_None;
- ADC_InitStructure.ADC_DataAlign = ADC_DataAlign_Right;
- ADC_InitStructure.ADC_NbrOfChannel = 1;
- ADC_Init(ADC1, &ADC_InitStructure);
- ADC_Cmd(ADC1, ENABLE);
- 
- //Channel settings
- ADC_RegularChannelConfig(ADC1, ADC_Channel_8, 1, ADC_SampleTime_55Cycles5);
- 
- ADC_ResetCalibration(ADC1);
- while (ADC_GetResetCalibrationStatus(ADC1));
- ADC_StartCalibration(ADC1);
- while (ADC_GetCalibrationStatus(ADC1)); 
-}
 
 
 void Spi_Init(void)
@@ -255,7 +230,34 @@ void USART_Configuration(void)
 }
 ///////////////////////////////////////////
 
+void Adc_Init()  
+{
+ ADC_InitTypeDef ADC_InitStructure;
+	
+ RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1, ENABLE);
 
+ ADC_StructInit(&ADC_InitStructure);
+ ADC_InitStructure.ADC_Mode = ADC_Mode_Independent;
+ ADC_InitStructure.ADC_ScanConvMode = ENABLE;
+ ADC_InitStructure.ADC_ContinuousConvMode = DISABLE;
+ ADC_InitStructure.ADC_ExternalTrigConv = ADC_ExternalTrigConv_None;
+ ADC_InitStructure.ADC_DataAlign = ADC_DataAlign_Right;
+ ADC_InitStructure.ADC_NbrOfChannel = 1;//1
+ ADC_Init(ADC1, &ADC_InitStructure);
+	
+ ADC_TempSensorVrefintCmd(ENABLE); //Opening the internal temperature sensor
+	
+ ADC_Cmd(ADC1, ENABLE);
+ 
+ //Channel settings
+ //ADC_RegularChannelConfig(ADC1, ADC_Channel_8, 1, ADC_SampleTime_55Cycles5);
+ //ADC_RegularChannelConfig(ADC1, ADC_Channel_16, 2, ADC_SampleTime_239Cycles5); //Internal temperature
+	
+ ADC_ResetCalibration(ADC1);
+ while (ADC_GetResetCalibrationStatus(ADC1));
+ ADC_StartCalibration(ADC1);
+ while (ADC_GetCalibrationStatus(ADC1)); 
+}
 
 volatile uint16_t ADCBuffer[] = {0xAAAA, 0xAAAA, 0xAAAA, 0xAAAA};
 

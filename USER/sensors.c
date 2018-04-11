@@ -5,6 +5,7 @@ float TCoupleData = 0;
 int dh_T = 0;
 int dh_H = 0;
 uint16_t co2 = 0;
+float internalTemp = 0;
 uint16_t dustLvl = 0;
 
 uint8_t ROM_SN[One_Wire_Device_Number_MAX][DS1822_SERIAL_NUM_SIZE];
@@ -13,9 +14,22 @@ float DS_Arr[128];
 
 uint16_t getCO2Level()
 {
+ ADC_RegularChannelConfig(ADC1, ADC_Channel_8, 1, ADC_SampleTime_55Cycles5); //External
  ADC_SoftwareStartConvCmd(ADC1, ENABLE);
  while(ADC_GetFlagStatus(ADC1, ADC_FLAG_EOC) == RESET);
  return ADC_GetConversionValue(ADC1);
+}
+
+float getInternalTemp()
+{
+ uint16_t result = 0;
+ ADC_RegularChannelConfig(ADC1, ADC_Channel_16, 1, ADC_SampleTime_71Cycles5); //Internal temperature
+ ADC_SoftwareStartConvCmd(ADC1, ENABLE);
+ while(ADC_GetFlagStatus(ADC1, ADC_FLAG_EOC) == RESET);
+ result = ADC_GetConversionValue(ADC1);
+ float v = result*0.000732421875; //*0.000732421875;
+ float temp = (1.23-v)/0.005+25.0;
+ return temp;
 }
 
 uint16_t Spi_Write_Data(uint16_t data)
@@ -149,6 +163,8 @@ DECLARE_TASK(Humidity_Hndl)
 DECLARE_TASK(GasSensor_Hndl)
 {
 	co2 = getCO2Level();
+	
+	internalTemp = getInternalTemp();
 	//printf("co2:%d \r\n", co2); 
 }	
 
@@ -176,6 +192,7 @@ DECLARE_TASK(DustSensor_Hndl)
 	PIN_ON(DUST_PIN_LED_PWM);
 	
 	//dustLvl = dustLvl*(3.3 / 1024) * 0.17 - 0.1;
+	internalTemp = getInternalTemp();
 	
 	__enable_irq ();
 }

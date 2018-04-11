@@ -68,6 +68,7 @@ printf(" \r\n\r\n");
 	if(dh_T == 0xFFFFFC00){ printf("DHT11 T: ---\r\n"); }
 	else { printf("DHT11 T: %i\r\n", dh_T); }
 	
+	printf("Internal:%f \r\n", internalTemp); 
 		
 	printf("---------Humidity---------\r\n"); 
 	
@@ -87,12 +88,17 @@ printf(" \r\n\r\n");
 uint8_t data_buff[27];
 DECLARE_TASK(RadioRead_T)
 {
+	float recievedInternalTemp = 0;
 	/*char t;
 	t = ReadByte(&RxBuff);
 	if(t != 0xFF){printf("%c", t);}*/
 	RadioPack_t pack;
+	memset(&pack, 0, sizeof(pack));
+	
 	uint16_t i = 0;
 	__disable_irq();
+	
+	//printf("GetAmount:%d \r\n", GetAmount(&RxBuff)); 
 	
 	if(GetAmount(&RxBuff) >= 25) //full pack recieved!
 	{		
@@ -100,8 +106,19 @@ DECLARE_TASK(RadioRead_T)
 		{
 			data_buff[i] = ReadByte(&RxBuff);
 		}		
-		memcpy(&pack, data_buff, 25);
+		memcpy(&pack, data_buff, 24);
+		if(pack.msgId = 0xBB)
+		{
+			printf("REMOTE MAC:%x:%x:%x:%x \r\n", pack.senderId.off0, pack.senderId.off2, pack.senderId.off4, pack.senderId.off8); 
+			printf("REMOTE ID:%x \r\n", pack.msgId); 
+			printf("REMOTE dustLvl:%d \r\n", pack.data[0]); 
+			
+			recievedInternalTemp = pack.data[1] + (float)pack.data[2]/100;
+			
+			printf("REMOTE tempLvl:%f \r\n", recievedInternalTemp); 
+		}
 		//MsgGet(&pack, data_buff);
+		ClearBuf(&RxBuff);
 	}
 	__enable_irq();
 }
@@ -109,6 +126,9 @@ DECLARE_TASK(RadioBroadcast_T)
 {
 	uint8_t data_buff[8];
 	for(int i = 0; i<8; i++){data_buff[i]=i;}	
+	data_buff[0] = dustLvl;
+	data_buff[1] = (uint8_t)internalTemp;
+	data_buff[2] = (uint8_t)(internalTemp*100)>>2;
     MsgSend(0xBB, data_buff);
 }
 
@@ -171,10 +191,12 @@ int main(void)
   __enable_irq ();
 
 	
-	 printf("%s\n", IsMaster ? "Master" : "Slave");
+	 printf("CONFIG = %s\r\n", IsMaster ? "Host" : "Slave");
 
 	if(IsMaster)
-	{		
+	{	
+		printf("HOST MAC:%x:%x:%x:%x \r\n", HostID.off0, HostID.off2, HostID.off4, HostID.off8); 	
+		
 		SetTimerTaskInfin(Ds18b20_Search, 0, 15000);
 		SetTimerTaskInfin(Ds18b20_ReguestTemp, 0, 1000);
 		SetTimerTaskInfin(TermoCoupe_Hndl, 0, 500);
@@ -182,9 +204,9 @@ int main(void)
 		SetTimerTaskInfin(GasSensor_Hndl, 0, 100);
 		SetTimerTaskInfin(VibroSensor_Hndl, 0, 1000);
 		
-	//	SetTimerTaskInfin(InfoOut_T, 0, 1500);
+		SetTimerTaskInfin(InfoOut_T, 0, 1500);
 		SetTimerTaskInfin(RadioRead_T, 0, 100);
-		//SetTimerTaskInfin(RadioBroadcast_T, 0, 1000);
+	//	SetTimerTaskInfin(RadioBroadcast_T, 0, 1000);
 	}
 	else
 	{
