@@ -2,6 +2,7 @@
 #include <stm32f10x_dma.h>
 #include "init.h"
 
+extern uint8_t verboseOutput;
 
 //http://www.avislab.com/blog/stm32-rtc/
 unsigned char RTC_Init(void)
@@ -113,6 +114,12 @@ PIN_CONFIGURATION(USER_KEY_A);
 PIN_CONFIGURATION(USER_KEY_B);
 
 PIN_CONFIGURATION(VIBRO_SENSOR_PIN);
+
+	if(PIN_SIGNAL(USER_KEY_A) == 0)//Pressed on start
+	{
+		verboseOutput = 1;
+	}
+
 }
 
 void SysTikConfig(void)

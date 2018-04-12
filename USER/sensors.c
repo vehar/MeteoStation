@@ -12,6 +12,8 @@ uint8_t ROM_SN[One_Wire_Device_Number_MAX][DS1822_SERIAL_NUM_SIZE];
 uint8_t devices_cnt = 0;
 float DS_Arr[128];
 
+extern uint8_t verboseOutput;
+
 uint16_t getCO2Level()
 {
  ADC_RegularChannelConfig(ADC1, ADC_Channel_8, 1, ADC_SampleTime_55Cycles5); //External
@@ -45,15 +47,17 @@ uint16_t Spi_Write_Data(uint16_t data)
 
 unsigned char One_Wire_Error_Handle (unsigned char err)
 {
-#ifdef VERBOSE_OUTPUT
+	/*
+if(verboseOutput)
+{
 	switch (err)
 	{
-	 	case One_Wire_Success: 					  printf("Success!"); 					break;
+	 	case One_Wire_Success: 					printf("Success!"); 					break;
 	 	case One_Wire_Error_No_Echo: 			printf("No echo recieved!");  break;
 	 	case One_Wire_Bus_Low_Error: 			printf("Pin LOW error!"); 		break;
-	 	case One_Wire_CRC_Error: 				  printf("CRC not match!"); 		break;
+	 	case One_Wire_CRC_Error: 				printf("CRC not match!"); 		break;
 	}
-#endif	
+}	*/
 	if (err==One_Wire_Success) {return 0; }
 	else {return 1;} //while(0); //or some error handler
 }
@@ -66,24 +70,23 @@ DECLARE_TASK(Ds18b20_Search)
 	unsigned char cnt;
 	__disable_irq();
 	
-#ifdef VERBOSE_OUTPUT	
-	printf("Checking 1-Wire bus...\r\n");
-#endif
+	//printf("Checking 1-Wire bus...\r\n");
 	
 	One_Wire_Error_Handle(One_Wire_Reset(One_Wire_Pin));
 	One_Wire_Error_Handle(DS1822_Search_Rom2(One_Wire_Pin, &devices_cnt, &ROM_SN)); //Sending SearchROM command...
 
-#ifdef VERBOSE_OUTPUT	
-	printf("Found %d sensor(s) \r\n", devices_cnt);
-		
-	for (cnt=0; cnt!=devices_cnt; cnt++)
-	{
-		unsigned char cnt2;
-		printf("Sensor %d  serial number: ", cnt);
-	//	for (cnt2=0; cnt2!=8; cnt2++) uart_print_hex_value (USART1, ROM_SN[cnt][cnt2]);
-		printf("\r\n");
+	if(verboseOutput)
+	{	
+		printf("Found %d sensor(s) \r\n", devices_cnt);
+			
+		for (cnt=0; cnt!=devices_cnt; cnt++)
+		{
+			unsigned char cnt2;
+			printf("Sensor %d  serial number: ", cnt);
+			for (cnt2=0; cnt2!=8; cnt2++) uart_print_hex_value (USART1, ROM_SN[cnt][cnt2]);
+			printf("\r\n");
+		}
 	}
-#endif	
 	
 	__enable_irq ();
 }	
@@ -93,20 +96,17 @@ unsigned int temp[One_Wire_Device_Number_MAX];
 DECLARE_TASK(Ds18b20_ReguestTemp)
 {
 	__disable_irq();
-
-#ifdef VERBOSE_OUTPUT		
-	printf("Starting convertion proccess...\r\n");
-#endif
+	
+	//printf("Starting convertion proccess...\r\n");
 	
 	for (uint8_t cnt=0; cnt!=devices_cnt; cnt++)
 	{
 		One_Wire_Error_Handle(DS1822_Start_Conversion_by_ROM(One_Wire_Pin, &(ROM_SN[cnt])));
 	}
-	
-#ifdef VERBOSE_OUTPUT		
-	printf("Waiting 750ms for conversion ready\r\n");
+		
+	//printf("Waiting 750ms for conversion ready\r\n");
 	//for (uint8_t cnt=0;cnt!=75;cnt++)	{	printf(".");delay_ms(10);	}
-#endif		
+	
 	__enable_irq ();
 	
 	SetTimerTaskInfin(Ds18b20_Hndl, 750, 0);
@@ -115,16 +115,18 @@ DECLARE_TASK(Ds18b20_ReguestTemp)
 DECLARE_TASK(Ds18b20_Hndl)
 {
 	__disable_irq ();
-#ifdef VERBOSE_OUTPUT		
-	printf("\r\n Getting results...\r\n");
+	/*
+if(verboseOutput)
+{	
+	//printf("\r\n Getting results...\r\n");
 	
 	for (uint8_t cnt=0; cnt!=devices_cnt; cnt++)
 	{
 		One_Wire_Error_Handle(DS1822_Get_Conversion_Result_by_ROM_CRC(One_Wire_Pin, &ROM_SN[cnt], &temp[cnt]));
 		printf("Sensor %d Temperature value: %d.%d *C\r\n", (cnt+1), (temp[cnt]>>4), (temp[cnt]&0x0F));
 	}
-
-#endif	
+}
+*/
 	for (uint8_t cnt=0; cnt!=devices_cnt; cnt++)
 	{
 		One_Wire_Error_Handle(DS1822_Get_Conversion_Result_by_ROM_CRC(One_Wire_Pin, &ROM_SN[cnt], &temp[cnt]));
@@ -178,22 +180,36 @@ DECLARE_TASK(VibroSensor_Hndl)
 		}
 }	
 
+#include "stm32_GPIO.h"
+
 DECLARE_TASK(DustSensor_Hndl)
 {
+	static uint8_t runCnt = 0;
+	static uint8_t dustLvlTmp = 0;
+	
+	if(runCnt < 10)
+	{
 	__disable_irq ();
+    Pin_Out_PP(GPIOB, 5);
 	PIN_OFF(DUST_PIN_LED_GND);
 	PIN_OFF(DUST_PIN_LED_PWM);
-	delay_ms(2);
+	delay_us(300);
 	
-	dustLvl = getCO2Level(); // B0
-	
-	delay_us(40);
-	PIN_ON(DUST_PIN_LED_GND);
-	PIN_ON(DUST_PIN_LED_PWM);
+	dustLvlTmp += getCO2Level(); // B0
+			
+	Pin_In(GPIOB, 5);
+	//PIN_ON(DUST_PIN_LED_PWM);
 	
 	//dustLvl = dustLvl*(3.3 / 1024) * 0.17 - 0.1;
 	internalTemp = getInternalTemp();
-	
+		
+	runCnt++;
+	}
+	else
+	{
+		dustLvl  = dustLvlTmp / 10;
+		runCnt = 0;
+	}
 	__enable_irq ();
 }
 
