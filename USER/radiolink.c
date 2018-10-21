@@ -4,8 +4,8 @@
 #include <stdio.h>
 #include <string.h>
 
-CircularBuffer RxBuff;
-CircularBuffer TxBuff;
+RingBuffer Radio_RxBuff;
+RingBuffer Radio_TxBuff;
 
 struct u_id HostID;
 
@@ -44,7 +44,7 @@ bool uid_cmp(struct u_id *id1, struct u_id *id2)
 
 //48 FF 6C 06 50 77 51 49 43 35 20 87 HOST ID
 int sz = 0;
-int MsgSend(uint32_t msgId, uint8_t* data_buff)
+int Radio_MsgSend(uint32_t msgId, uint8_t* data_buff)
 {
 	struct u_id senderId;
 	RadioPack_t pack;
@@ -63,16 +63,16 @@ int MsgSend(uint32_t msgId, uint8_t* data_buff)
 	{		
 		elem = *(elem_p+i);
 		crc ^= elem;
-		WriteByte(&TxBuff, elem);
+		WriteByte(&TX_BUFF, elem);
 	}
 	pack.crc = crc;
-	WriteByte(&TxBuff, pack.crc);
+	WriteByte(&TX_BUFF, pack.crc);
 	
-	USART_SendData(USART3,ReadByte(&TxBuff));
-	USART_ITConfig(USART3, USART_IT_TC, ENABLE);
+	USART_SendData(RADIO_UART, ReadByte(&TX_BUFF));
+	USART_ITConfig(RADIO_UART, USART_IT_TC, ENABLE);
 }
 
-int MsgGet(RadioPack_t* pack, uint8_t* data_buff)
+int Radio_MsgGet(RadioPack_t* pack, uint8_t* data_buff)
 {
 	uint8_t crc = 0;
 	memset(&pack, 0, sizeof(pack));
@@ -83,33 +83,68 @@ int MsgGet(RadioPack_t* pack, uint8_t* data_buff)
 	elem_p = (uint8_t*)&pack;
 	for(int i = 0; i<sz; i++)
 	{		
-		elem = ReadByte(&RxBuff);	
+		elem = ReadByte(&RX_BUFF);	
 		crc ^= elem;
 		*(elem_p+i) = elem;
 	}
-	pack->crc = ReadByte(&RxBuff);
+	pack->crc = ReadByte(&RX_BUFF);
 	return (pack->crc == crc);	
 }
 
-void USART3_IRQHandler(void)
+
+void RadioB_MsgSend(uint8_t* data_buff, uint8_t sz)
+{
+	for(int i = 0; i<sz; i++)
+	{
+		WriteByte(&TX_BUFF, data_buff[i]);
+	}
+	
+	USART_SendData(RADIO_UART, ReadByte(&TX_BUFF));
+	USART_ITConfig(RADIO_UART, USART_IT_TC, ENABLE);
+}
+
+int RadioB_MsgGet(uint8_t* data_buff)
+{
+	int sz = GetAmount(&RX_BUFF);
+	//if(sz>0){sz -= 1;}
+	for(int i = 0; i<sz; i++)
+	{
+		data_buff[i] = ReadByte(&RX_BUFF);
+	}
+	return sz;
+}
+
+//TODO:
+void HC12_configBaud(int baud)
+{
+	uint8_t buff[20];
+	memset(buff, 0, 20);
+	PIN_OFF(RADIO_SET);
+	delay_ms(1000);
+//	RadioB_MsgSend("AT\r\n");
+	delay_ms(500);
+	RadioB_MsgGet(buff);
+	PIN_ON(RADIO_SET);
+}
+
+void RADIO_IRQHandler(void)
 {
 	char t = 0;
-    if(USART_GetITStatus(USART3, USART_IT_RXNE) != RESET)
-    {
-		//USART_ClearFlag(USART3, USART_FLAG_RXNE);
-	  t = USART_ReceiveData(USART3);
-	  WriteByte(&RxBuff, t);
-    }
-	if(USART_GetITStatus(USART3, USART_IT_TC) != RESET)
-    {
-        USART_ClearITPendingBit(USART3, USART_IT_TC);//очищаем признак прерывания
-        if(!IsEmpty(&TxBuff))
+  if(USART_GetITStatus(RADIO_UART, USART_IT_RXNE) != RESET)
+  {
+			t = USART_ReceiveData(RADIO_UART);
+			WriteByte(&RX_BUFF, t);
+  }
+	if(USART_GetITStatus(RADIO_UART, USART_IT_TC) != RESET)
+  {
+    USART_ClearITPendingBit(RADIO_UART, USART_IT_TC);//очищаем признак прерывания
+    if(!IsEmpty(&TX_BUFF))
 		{
-			USART_SendData(USART3,ReadByte(&TxBuff));
+			USART_SendData(RADIO_UART,ReadByte(&TX_BUFF));
 		}
 		else
 		{
-			USART_ITConfig(USART3, USART_IT_TC, DISABLE);
+			USART_ITConfig(RADIO_UART, USART_IT_TC, DISABLE);
 		}
-   }
+  }
 }

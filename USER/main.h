@@ -40,7 +40,7 @@ struct __FILE { int handle;  };
 /* Private function prototypes -----------------------------------------------*/
 
 	
-#define MAPPLE_LED  C, 13, HIGH, MODE_OUTPUT_PUSH_PULL, SPEED_2MHZ
+//#define MAPPLE_LED  C, 13, HIGH, MODE_OUTPUT_PUSH_PULL, SPEED_2MHZ
 
 
 #endif /* MAIN_H_ */

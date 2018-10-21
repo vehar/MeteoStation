@@ -98,11 +98,12 @@ void RTOS_timer_init (void)
 	
 			TIM_DeInit(TIM2);
 			
-			RCC_ClocksTypeDef RCC_Clocks;
+			SystemCoreClockUpdate();
+			RCC_ClocksTypeDef RCC_Clocks;		
 			RCC_GetClocksFreq(&RCC_Clocks);		
 			
 			//TODO: need time corrections!
-			TIM_TimeBaseStructure.TIM_Period 					= (RCC_Clocks.HCLK_Frequency / 1000); //1ms			 																						
+			TIM_TimeBaseStructure.TIM_Period 					= (RCC_Clocks.HCLK_Frequency / 10000); //1ms			 																						
 			TIM_TimeBaseStructure.TIM_Prescaler 			= 10;				   
 			TIM_TimeBaseStructure.TIM_ClockDivision		=	TIM_CKD_DIV1; 		
 			TIM_TimeBaseStructure.TIM_CounterMode			=	TIM_CounterMode_Up; 	

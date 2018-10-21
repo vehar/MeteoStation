@@ -21,15 +21,15 @@ typedef struct {
   size_t first;
   size_t last;
   uint8_t data[BUFFER_SIZE];
-} CircularBuffer;
+} RingBuffer;
 
-extern size_t GetAmount(CircularBuffer* pBuf);
-extern bool IsFull(CircularBuffer* pBuf);
-extern bool IsEmpty(CircularBuffer* pBuf);
-extern void ClearBuf(CircularBuffer* pBuf);
-extern uint8_t ReadByte(CircularBuffer* pBuf);
-extern bool WriteByte(CircularBuffer* pBuf, uint8_t value);
-extern void PrintBuffer(CircularBuffer* pBuf);
-extern size_t BufMoveFast(CircularBuffer* pDest, CircularBuffer* pSource);
-extern size_t GetFree(CircularBuffer* pBuf);
-extern size_t GetAmount(CircularBuffer* pBuf);
+extern size_t GetAmount(RingBuffer* pBuf);
+extern bool IsFull(RingBuffer* pBuf);
+extern bool IsEmpty(RingBuffer* pBuf);
+extern void ClearBuf(RingBuffer* pBuf);
+extern uint8_t ReadByte(RingBuffer* pBuf);
+extern bool WriteByte(RingBuffer* pBuf, uint8_t value);
+extern void PrintBuffer(RingBuffer* pBuf);
+extern size_t BufMoveFast(RingBuffer* pDest, RingBuffer* pSource);
+extern size_t GetFree(RingBuffer* pBuf);
+extern size_t GetAmount(RingBuffer* pBuf);

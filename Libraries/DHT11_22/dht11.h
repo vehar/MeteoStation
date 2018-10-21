@@ -6,7 +6,7 @@
 //#include "utils.h"
 #include "stdint.h"
 /* Exported constants --------------------------------------------------------*/
-#define MAX_TICS 20000
+#define MAX_TICS 30000
 #define DHT_OK 0
 #define DHT_NO_CONN 1
 #define DHT_CS_ERROR 2

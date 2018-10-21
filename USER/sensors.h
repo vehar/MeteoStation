@@ -29,10 +29,9 @@
 #define LED1  B, 0, HIGH, MODE_OUTPUT_PUSH_PULL, SPEED_2MHZ	
 #define LED2  B, 1, HIGH, MODE_OUTPUT_PUSH_PULL, SPEED_2MHZ	
 
-#define USER_KEY_A  C, 13, HIGH, MODE_INPUT_PULL_UP, SPEED_2MHZ		
 #define USER_KEY_B  B, 2, HIGH, MODE_INPUT_FLOATING, SPEED_2MHZ	
 
-#define One_Wire_Pin 		GPIOB, GPIO_Pin_9
+#define One_Wire_Pin 		GPIOA, GPIO_Pin_15
 
 //////////
 //#define	 CS_LOW 	GPIOB->BSRR = GPIO_BSRR_BR1;

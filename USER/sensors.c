@@ -150,10 +150,10 @@ DECLARE_TASK(TermoCoupe_Hndl)
 DECLARE_TASK(Humidity_Hndl)
 {
 		//__disable_irq ();
-	dht_process(DHT11);
+	dht_process(DHT22);
 	
-	dh_T = dhtGet(DHT_TEMP, DHT11); 
-	dh_H = dhtGet(DHT_HUM,  DHT11);
+	dh_T = dhtGet(DHT_TEMP, DHT22); 
+	dh_H = dhtGet(DHT_HUM,  DHT22);
 	/*
 	if(dh_T == 0xFFFFFC00){ printf("DHT11 T: ---\r\n"); }
 		else { printf("DHT11 T: %i\r\n", dh_T); }
@@ -174,10 +174,7 @@ DECLARE_TASK(GasSensor_Hndl)
 DECLARE_TASK(VibroSensor_Hndl)
 {
 		//Work vs vibrosensor 
-	if(!PIN_SIGNAL(VIBRO_SENSOR_PIN))
-		{
-				
-		}
+
 }	
 
 #include "stm32_GPIO.h"
@@ -190,14 +187,14 @@ DECLARE_TASK(DustSensor_Hndl)
 	if(runCnt < 10)
 	{
 	__disable_irq ();
-    Pin_Out_PP(GPIOB, 5);
-	PIN_OFF(DUST_PIN_LED_GND);
-	PIN_OFF(DUST_PIN_LED_PWM);
+//    Pin_Out_PP(GPIOB, 5);
+//	PIN_OFF(DUST_PIN_LED_GND);
+//	PIN_OFF(DUST_PIN_LED_PWM);
 	delay_us(300);
 	
 	dustLvlTmp += getCO2Level(); // B0
 			
-	Pin_In(GPIOB, 5);
+//	Pin_In(GPIOB, 5);
 	//PIN_ON(DUST_PIN_LED_PWM);
 	
 	//dustLvl = dustLvl*(3.3 / 1024) * 0.17 - 0.1;

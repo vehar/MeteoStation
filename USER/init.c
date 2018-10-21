@@ -64,7 +64,7 @@ void Spi_Init(void)
     SPI2->CR1 |= SPI_CR1_MSTR;              //Mode Master
     SPI2->CR1 |= SPI_CR1_SPE;               //Enable SPI2
 	
-	PIN_CONFIGURATION(PB_1);
+	//PIN_CONFIGURATION(PB_1);
 }
 
 void GPIO_Configuration(void)
@@ -106,20 +106,23 @@ GPIO_InitStructure.GPIO_Pin = GPIO_Pin_13;					    //USER KEY A
   GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING; 
   GPIO_Init(GPIOB, &GPIO_InitStructure);*/
 
-PIN_CONFIGURATION(PB_7);
-PIN_CONFIGURATION(BOARD_LED); 
-//PIN_CONFIGURATION(LED2);
+PIN_CONFIGURATION(POW_1v5_EN);
+//PIN_ON(POW_1v5_EN);
+
+PIN_CONFIGURATION(POW_5v0_EN);
+PIN_ON(POW_5v0_EN);
+
+PIN_CONFIGURATION(GSM_ON_OFF);
+//PIN_OFF(GSM_ON_OFF);
+
+PIN_CONFIGURATION(RADIO_SET);
+PIN_ON(RADIO_SET);
 
 PIN_CONFIGURATION(USER_KEY_A);
-PIN_CONFIGURATION(USER_KEY_B);
-
-PIN_CONFIGURATION(VIBRO_SENSOR_PIN);
-
 	if(PIN_SIGNAL(USER_KEY_A) == 0)//Pressed on start
 	{
 		verboseOutput = 1;
 	}
-
 }
 
 void SysTikConfig(void)
@@ -202,7 +205,7 @@ void USART_Configuration(void)
 	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
 	NVIC_Init(&NVIC_InitStructure);
 	
-  USART_InitStructure.USART_BaudRate = 9600; //115200
+  USART_InitStructure.USART_BaudRate = 9600; //115200 //9600
   USART_InitStructure.USART_WordLength = USART_WordLength_8b;
   USART_InitStructure.USART_StopBits = USART_StopBits_1;
   USART_InitStructure.USART_Parity = USART_Parity_No;
@@ -216,7 +219,6 @@ void USART_Configuration(void)
   
   //Radiolink uart
   //USART2_TX -> PA2 , USART2_RX ->	PA3
-  
   //USART3_TX -> PB10 , USART2_RX ->	PB11
   RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART3, ENABLE); 
 	

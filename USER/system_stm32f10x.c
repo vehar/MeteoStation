@@ -1015,6 +1015,25 @@ static void SetSysClockTo72(void)
   else
   { /* If HSE fails to start-up, the application will have wrong clock 
          configuration. User can add here some code to deal with this error */
+		RCC_DeInit();
+		RCC_HSEConfig(RCC_HSE_OFF); 
+		RCC_HSICmd(ENABLE);
+		
+		while(RCC_GetFlagStatus(RCC_FLAG_HSIRDY)!=SET);
+
+		RCC_PLLCmd(DISABLE);
+		RCC_PLLConfig(RCC_PLLSource_HSI_Div2, RCC_PLLMul_12);
+		RCC_PLLCmd(ENABLE);
+		while(RCC_GetFlagStatus(RCC_FLAG_PLLRDY)!=SET); //wait till pll ready
+		
+		FLASH->ACR |= FLASH_ACR_PRFTBE; // Enable Prefetch Buffer.
+		FLASH->ACR &= ~FLASH_ACR_LATENCY; // 
+		//FLASH->ACR |= FLASH_ACR_LATENCY_0; //  SystemCoreClock <= 24  - no skipp 
+		//FLASH->ACR |= FLASH_ACR_LATENCY_1; //  24< SystemCoreClock <= 48,  - skip 1 clk
+		FLASH->ACR |= FLASH_ACR_LATENCY_2; //  48< SystemCoreClock <= 72,  - skip 2 clk
+		
+		RCC_SYSCLKConfig(RCC_SYSCLKSource_PLLCLK);
+		
   }
 }
 #endif

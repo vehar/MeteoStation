@@ -2,7 +2,10 @@
 #include "init.h"
 #include "RingBuffer.h"
 #include "sensors.h"
+
 #include "radiolink.h"
+#include "gsm.h"
+
 #include "EERTOS.h"
 
 #define VERBOSE_OUTPUT
@@ -31,8 +34,8 @@ int fputc(int ch, FILE *f)
     while (ITM_Port32(0) == 0);
     ITM_Port8(0) = ch;
   }*/
-	uart_send_char(USART1, ch);//Debug uart
-//	uart_send_char(USART3, ch); //Radio uart
+	uart_send_char(USART1, ch);//Radio uart
+	//uart_send_char(USART3, ch); //GSM uart
   return(ch);
 }  
 
@@ -49,13 +52,13 @@ DECLARE_TASK(T_HeartBit)
 	static uint8_t t = 0;
 	if(IsMaster)
 	{
-		if(!t){PIN_ON(BOARD_LED);}
-		else{PIN_OFF(BOARD_LED);}
+	//	if(!t){PIN_ON(BOARD_LED);}
+	//	else{PIN_OFF(BOARD_LED);}
 	}
 	else //MAPPLE_LED
 	{
-		if(!t){PIN_ON(MAPPLE_LED);}
-		else{PIN_OFF(MAPPLE_LED);}
+	//	if(!t){PIN_ON(MAPPLE_LED);}
+	//	else{PIN_OFF(MAPPLE_LED);}
 	}
 	t = !t;
 }	 
@@ -118,7 +121,7 @@ DECLARE_TASK(RadioRead_T)
 	memcpy(&slaveID, &Slave1IDArr, sizeof(Slave1IDArr));
 	
 	/*char t;
-	t = ReadByte(&RxBuff);
+	t = ReadByte(&Radio_RxBuff);
 	if(t != 0xFF){printf("%c", t);}*/
 	RadioPack_t pack;
 	memset(&pack, 0, sizeof(pack));
@@ -126,13 +129,13 @@ DECLARE_TASK(RadioRead_T)
 	uint16_t i = 0;
 	__disable_irq();
 	
-	//printf("GetAmount:%d \r\n", GetAmount(&RxBuff)); 
+	//printf("GetAmount:%d \r\n", GetAmount(&Radio_RxBuff)); 
 	
-	if(GetAmount(&RxBuff) >= 25) //full pack recieved!
+	if(GetAmount(&Radio_RxBuff) >= 25) //full pack recieved!
 	{		
 		for(int i = 0; i<=26; i++)
 		{
-			data_buff[i] = ReadByte(&RxBuff);
+			data_buff[i] = ReadByte(&Radio_RxBuff);
 		}		
 		memcpy(&pack, data_buff, 24);
 		RXslaveID = pack.senderId;
@@ -159,18 +162,19 @@ DECLARE_TASK(RadioRead_T)
 			SetTimerTaskInfin(T_HeartBit, 0, 100);
 			ClearTimerTask(RadioRead_T); //Stop listening
 		}
-		//MsgGet(&pack, data_buff);
-		ClearBuf(&RxBuff);
+		//Radio_MsgGet(&pack, data_buff);
+		ClearBuf(&Radio_RxBuff);
 	}
 	__enable_irq();
 }
+
 DECLARE_TASK(RadioBroadcast_T)
 {
 	uint8_t data_buff[8];
 	for(int i = 0; i<8; i++){data_buff[i]=0;}	
 	if(IsMaster)
 	{
-		MsgSend(0xAA, data_buff);
+		Radio_MsgSend(0xAA, data_buff);
 	}
 	else
 	{
@@ -180,59 +184,97 @@ DECLARE_TASK(RadioBroadcast_T)
 		data_buff[1] = dh_T;
 		data_buff[2] = dh_H;
 		
-		MsgSend(0xBB, data_buff);
+		Radio_MsgSend(0xBB, data_buff);
 	}
 }
 
+DECLARE_TASK(GSM_Ping);
 
-/*	
-$48
-$FF
-$6C
-$06
-$50
-$77
-$51
-$49
-$43
-$35
-$20
-$87
-$00
-$01
-$02
-$03
-$04
-$05
-$06
-$07
-$AA
-$00
-$00
-$00
-$99
-*/
+DECLARE_TASK(GSM_Start)
+{
+	//if(PIN_SIGNAL(GSM_ON_OFF) == false)
+	{
+		PIN_OFF(GSM_ON_OFF);
+		printf("GSM_ON_OFF\r"); 
+	}
+	
+	T_Delay(3000);
+	
+	//if(PIN_SIGNAL(GSM_ON_OFF) == true)
+	{
+		PIN_ON(GSM_ON_OFF);
+		printf("PIN_ON\r"); 
+		T_Delay(1000);
+		//SetTimerTaskInfin(GSM_Ping, 0, 0);
+		
+		//printf("ATD+380930893448;\r"); 
+	}
+}
+
+DECLARE_TASK(GSM_Call)
+{
+	printf("AT\r"); 
+	printf("ATD+380930893448;\r"); 
+}
+DECLARE_TASK(GSM_Ping)
+{
+	bool exit = false;
+	uint8_t msgBuff[50];
+	do
+	{
+//		GSM_MsgSend("AT\r\n"); 
+		GSM_MsgGet(msgBuff);
+		T_Delay(1000);
+		if(strstr(msgBuff, "OK") != 0) {exit = true;}
+		printf("ping..%s \r\n",msgBuff); 
+		memset(msgBuff, 0, 50);	
+		
+	} while(!exit);
+	
+	printf("GSM_OK\r\n"); 
+//	GSM_MsgSend("ATD+380930893448;\r\n"); 
+}
+
+uint8_t GRmsgBuff[50];
+DECLARE_TASK(GSM_to_Radio)
+{
+	memset(GRmsgBuff, 0, 50);
+	uint8_t size = GSM_MsgGet(GRmsgBuff);
+	if(size != 0) {RadioB_MsgSend(GRmsgBuff, size);}
+}
+
+uint8_t RGmsgBuff[50];
+DECLARE_TASK(Radio_to_GSM)
+{
+	memset(RGmsgBuff, 0, 50);	
+	uint8_t size = RadioB_MsgGet(RGmsgBuff);
+	if(size != 0) {GSM_MsgSend(RGmsgBuff, size); /*printf(">> %s", msgBuff);*/}
+}
 
 //TODO: add stm temperature + calibration
 //TODO: add vibro and butt IRQ
 //TODO: fix DHT_CS_ERROR for DHT
 
+void GSM_start(void)
+{
+	
+}
+
 // http://we.easyelectronics.ru/STM32/stm32-usart-na-preryvaniyah-na-primere-rs485.html 
 int main(void)
 {
+	struct u_id idn;	
 	uid_read(&HostID);
-	struct u_id idn;
 	memcpy(&idn, &HostIDArr, sizeof(HostIDArr));
-    IsMaster = uid_cmp(&HostID, &idn);
-   
-	
-	ClearBuf(&RxBuff); 
+  IsMaster = uid_cmp(&HostID, &idn);
+		
+	ClearBuf(&Radio_RxBuff); 
 	Delay_Init();
 	
 	GPIO_Configuration();
 	USART_Configuration();
-	
-	Spi_Init();
+
+	//Spi_Init();
 	Adc_Init();
 	
 	RTOS_timer_init();
@@ -242,38 +284,39 @@ int main(void)
   __enable_irq ();
 
 	
-	 printf("CONFIG = %s\r\n", IsMaster ? "Host" : "Slave");
+//	 printf("CONFIG = %s\r\n", IsMaster ? "Host" : "Slave");
 
-	SetTimerTaskInfin(RadioRead_T, 0, 100);
-	SetTimerTaskInfin(RadioBroadcast_T, 0, 1000);	
+	//SetTimerTaskInfin(RadioRead_T, 0, 100);
+	//SetTimerTaskInfin(RadioBroadcast_T, 0, 1000);	
+	
 	SetTimerTaskInfin(T_HeartBit, 0, 1000);
 	
 	if(IsMaster)
 	{	
-		printf("HOST MAC:%x:%x:%x:%x \r\n", HostID.off0, HostID.off2, HostID.off4, HostID.off8); 	
+//		printf("HOST MAC:%x:%x:%x:%x \r\n", HostID.off0, HostID.off2, HostID.off4, HostID.off8); 	
 		
 		SetTimerTaskInfin(Ds18b20_Search, 0, 15000);
 		SetTimerTaskInfin(Ds18b20_ReguestTemp, 0, 1000);
-		SetTimerTaskInfin(TermoCoupe_Hndl, 0, 500);
 	//	SetTimerTaskInfin(Humidity_Hndl, 0, 1000);
 		SetTimerTaskInfin(GasSensor_Hndl, 0, 100);
-		SetTimerTaskInfin(VibroSensor_Hndl, 0, 1000);
 		
 		SetTimerTaskInfin(InfoOut_T, 0, 1500);
 	}
 	else
 	{
-		PIN_CONFIGURATION(MAPPLE_LED);	
-		PIN_CONFIGURATION(DUST_PIN_LED_GND);
-		PIN_CONFIGURATION(DUST_PIN_LED_PWM);
 		//PIN_CONFIGURATION(DUST_PIN_ANALOG);
 		
-		SetTimerTaskInfin(Humidity_Hndl, 0, 1000);
-		SetTimerTaskInfin(DustSensor_Hndl, 0, 100);
+		//SetTimerTaskInfin(Humidity_Hndl, 0, 3000);
+	//	HC12_configBaud(1152);
+		SetTimerTaskInfin(GSM_Start, 0, 0);
+		//SetTimerTaskInfin(GSM_Ping, 0, 0);
+		SetTimerTaskInfin(GSM_to_Radio, 0, 20);
+		SetTimerTaskInfin(Radio_to_GSM, 0, 50);
+		//SetTimerTaskInfin(DustSensor_Hndl, 0, 100);
 	}
 
 	
-	printf("Start......\r\n");	 
+//	printf("Start......\r\n");	 
 
 	Shedull(1);//зациклились через диспетчер
 	
@@ -295,16 +338,21 @@ void TIM2_IRQHandler(void)
   }	
 }
 
-
-void USART1_IRQHandler(void)
+/*
+void USART3_IRQHandler(void)
 {
 	char t = 0;
-    if ((USART1->SR & USART_FLAG_RXNE) != (u16)RESET)
+    if ((USART3->SR & USART_FLAG_RXNE) != (u16)RESET)
     {		
-       t = USART_ReceiveData(USART1);
-	   //WriteByte(&RxBuff, t);
+       t = USART_ReceiveData(USART3);
+	   //WriteByte(&Radio_RxBuff, t);
     }
-}
+		if(USART_GetITStatus(USART3, USART_IT_TC) != RESET)
+  {
+    USART_ClearITPendingBit(USART3, USART_IT_TC);//очищаем признак прерывания
+
+  }
+}*/
 
 
 /*********************************************************************************************************

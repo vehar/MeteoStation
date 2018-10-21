@@ -26,7 +26,7 @@ void Pin_In (GPIO_TypeDef * GPIOx,u16 PINx)
 	GPIO_InitTypeDef GPIO_InitStruct;
 	GPIO_InitStruct.GPIO_Pin=PINx;
 	GPIO_InitStruct.GPIO_Speed=GPIO_Speed_50MHz;
-	GPIO_InitStruct.GPIO_Mode=GPIO_Mode_IN_FLOATING;
+	GPIO_InitStruct.GPIO_Mode=GPIO_Mode_IN_FLOATING;//GPIO_Mode_IN_FLOATING
 	GPIO_Init(GPIOx, &GPIO_InitStruct);
 }
 

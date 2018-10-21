@@ -3,6 +3,7 @@
 #include "main.h"
 //#include "delay.h"
 #include "systick.h"
+#include "stm32_GPIO.h"
 
 #define DHT11_SET_OUT ( (GPIOA->CRL &= ~GPIO_CRL_MODE6) + (GPIOA->CRL |= GPIO_CRL_MODE6_1) + (GPIOA->CRL |= GPIO_CRL_CNF6_0)) // Open drain
 #define DHT11_SET_IN  ( (GPIOA->CRL &= ~GPIO_CRL_MODE6) + (GPIOA->CRL &= ~GPIO_CRL_CNF6) + (GPIOA->CRL |= GPIO_CRL_CNF6_0))
@@ -10,12 +11,27 @@
 #define DHT11_HI 		 	(GPIOA->BSRR |= GPIO_BSRR_BS6)
 #define DHT11_IN			(GPIOA->IDR & GPIO_IDR_IDR6)
 
-
+/*
 #define DHT22_SET_OUT ( (GPIOB->CRL &= ~GPIO_CRL_MODE0) + (GPIOB->CRL |= GPIO_CRL_MODE0_1) + (GPIOB->CRL |= GPIO_CRL_CNF0_0)) // Open drain
 #define DHT22_SET_IN  ( (GPIOB->CRL &= ~GPIO_CRL_MODE0) + (GPIOB->CRL &= ~GPIO_CRL_CNF0) + (GPIOB->CRL |= GPIO_CRL_CNF0_0))
 #define DHT22_LOW	 		(GPIOB->BSRR |= GPIO_BSRR_BR0)
 #define DHT22_HI 		 	(GPIOB->BSRR |= GPIO_BSRR_BS0)
 #define DHT22_IN			(GPIOB->IDR & GPIO_IDR_IDR0)	
+*/
+/*
+#define DHT22_SET_OUT ( (GPIOB->CRH &= ~GPIO_CRH_MODE8) + (GPIOB->CRH |= GPIO_CRH_MODE8_1) + (GPIOB->CRH |= GPIO_CRH_CNF8_0)) // Open drain
+#define DHT22_SET_IN  ( (GPIOB->CRH &= ~GPIO_CRH_MODE8) + (GPIOB->CRH &= ~GPIO_CRH_CNF8) + (GPIOB->CRH |= GPIO_CRH_CNF8_0))
+#define DHT22_LOW	 		(GPIOB->BSRR |= GPIO_BSRR_BR8)
+#define DHT22_HI 		 	(GPIOB->BSRR |= GPIO_BSRR_BS8)
+#define DHT22_IN			(GPIOB->IDR & GPIO_IDR_IDR8)	
+*/
+#define DHT22_PIN 		GPIOB, GPIO_Pin_8
+
+#define DHT22_SET_OUT  Pin_Out_Od(DHT22_PIN)// Open drain
+#define DHT22_SET_IN   Pin_In(DHT22_PIN)
+#define DHT22_LOW	 		 Pin_Off(DHT22_PIN)
+#define DHT22_HI 		 	 Pin_On(DHT22_PIN)
+#define DHT22_IN			 Pin_Syg(DHT22_PIN)
 
 unsigned char dht_buf[2][5];
 
@@ -102,8 +118,9 @@ uint8_t read_DHT(uint8_t *buf, int sensor){
 	} else  {
 			DHT22_SET_OUT;
 			DHT22_LOW;
-			delay_ms(20);
+			delay_us(500);
 			DHT22_HI;
+			delay_us(30);
 			DHT22_SET_IN;		
 	}
 	
