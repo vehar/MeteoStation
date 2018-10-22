@@ -15,6 +15,10 @@
 extern RingBuffer Gsm_RxBuff;
 extern RingBuffer Gsm_TxBuff;
 
+enum GSM_state{ON, OFF, OFFLINE};
+
+extern uint8_t GSM_state_f;
+
 int GSM_MsgGet(uint8_t* data_buff);	
 void GSM_MsgSend(uint8_t* data_buff, uint8_t sz);
 

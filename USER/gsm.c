@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 
+uint8_t GSM_state_f;
 RingBuffer Gsm_RxBuff;
 RingBuffer Gsm_TxBuff;
 

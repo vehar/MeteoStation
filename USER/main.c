@@ -192,23 +192,18 @@ DECLARE_TASK(GSM_Ping);
 
 DECLARE_TASK(GSM_Start)
 {
-	//if(PIN_SIGNAL(GSM_ON_OFF) == false)
+	printf("GSM_Start\r"); 
+	
+	GSM_Ping(); //Check state firstly 
+	if(GSM_state_f == OFF)
 	{
 		PIN_OFF(GSM_ON_OFF);
 		printf("GSM_ON_OFF\r"); 
-	}
-	
-	T_Delay(3000);
-	
-	//if(PIN_SIGNAL(GSM_ON_OFF) == true)
-	{
+		T_Delay(3000);
 		PIN_ON(GSM_ON_OFF);
 		printf("PIN_ON\r"); 
 		T_Delay(1000);
-		//SetTimerTaskInfin(GSM_Ping, 0, 0);
-		
-		//printf("ATD+380930893448;\r"); 
-	}
+	}		
 }
 
 DECLARE_TASK(GSM_Call)
@@ -219,33 +214,35 @@ DECLARE_TASK(GSM_Call)
 DECLARE_TASK(GSM_Ping)
 {
 	bool exit = false;
+	uint8_t AT[] = {"AT\r\n"};
 	uint8_t msgBuff[50];
-	do
-	{
-//		GSM_MsgSend("AT\r\n"); 
+
+		GSM_MsgSend(AT, sizeof(AT)); 
+		T_Delay(500);
 		GSM_MsgGet(msgBuff);
-		T_Delay(1000);
-		if(strstr(msgBuff, "OK") != 0) {exit = true;}
+		if(strstr(msgBuff, "OK") != 0) {GSM_state_f = ON; } //GSM - online and ON
+		else if (strstr(msgBuff, "AT") != 0) {GSM_state_f = OFF; } //GSM - online but OFF
+		else {GSM_state_f = OFFLINE;} //GSM - offline
 		printf("ping..%s \r\n",msgBuff); 
 		memset(msgBuff, 0, 50);	
-		
-	} while(!exit);
 	
-	printf("GSM_OK\r\n"); 
+	if(GSM_state_f != OFFLINE) {SetTimerTaskInfin(GSM_Start, 0, 0);}
+	if(GSM_state_f == ON) { printf("GSM_OK\r\n"); }
 //	GSM_MsgSend("ATD+380930893448;\r\n"); 
 }
 
-uint8_t GRmsgBuff[50];
 DECLARE_TASK(GSM_to_Radio)
 {
+	uint8_t GRmsgBuff[50];
 	memset(GRmsgBuff, 0, 50);
 	uint8_t size = GSM_MsgGet(GRmsgBuff);
 	if(size != 0) {RadioB_MsgSend(GRmsgBuff, size);}
 }
 
-uint8_t RGmsgBuff[50];
+
 DECLARE_TASK(Radio_to_GSM)
 {
+	uint8_t RGmsgBuff[50];
 	memset(RGmsgBuff, 0, 50);	
 	uint8_t size = RadioB_MsgGet(RGmsgBuff);
 	if(size != 0) {GSM_MsgSend(RGmsgBuff, size); /*printf(">> %s", msgBuff);*/}
@@ -254,11 +251,6 @@ DECLARE_TASK(Radio_to_GSM)
 //TODO: add stm temperature + calibration
 //TODO: add vibro and butt IRQ
 //TODO: fix DHT_CS_ERROR for DHT
-
-void GSM_start(void)
-{
-	
-}
 
 // http://we.easyelectronics.ru/STM32/stm32-usart-na-preryvaniyah-na-primere-rs485.html 
 int main(void)
@@ -274,7 +266,6 @@ int main(void)
 	GPIO_Configuration();
 	USART_Configuration();
 
-	//Spi_Init();
 	Adc_Init();
 	
 	RTOS_timer_init();
@@ -308,10 +299,10 @@ int main(void)
 		
 		//SetTimerTaskInfin(Humidity_Hndl, 0, 3000);
 	//	HC12_configBaud(1152);
-		SetTimerTaskInfin(GSM_Start, 0, 0);
-		//SetTimerTaskInfin(GSM_Ping, 0, 0);
-		SetTimerTaskInfin(GSM_to_Radio, 0, 20);
-		SetTimerTaskInfin(Radio_to_GSM, 0, 50);
+		
+		SetTimerTaskInfin(GSM_Ping, 0, 1000);
+		SetTimerTaskInfin(GSM_to_Radio, 0, 100);
+		SetTimerTaskInfin(Radio_to_GSM, 0, 150);
 		//SetTimerTaskInfin(DustSensor_Hndl, 0, 100);
 	}
 
@@ -323,12 +314,6 @@ int main(void)
 	while(1){}// Fatal RTOS error
 }
 
-
-void SysTick_Handler (void)
-{
-    
-}
-
 void TIM2_IRQHandler(void)
 {
 	if ( TIM_GetITStatus(TIM2, TIM_IT_Update) != RESET ) 
@@ -338,23 +323,10 @@ void TIM2_IRQHandler(void)
   }	
 }
 
-/*
-void USART3_IRQHandler(void)
+void SysTick_Handler (void)
 {
-	char t = 0;
-    if ((USART3->SR & USART_FLAG_RXNE) != (u16)RESET)
-    {		
-       t = USART_ReceiveData(USART3);
-	   //WriteByte(&Radio_RxBuff, t);
-    }
-		if(USART_GetITStatus(USART3, USART_IT_TC) != RESET)
-  {
-    USART_ClearITPendingBit(USART3, USART_IT_TC);//очищаем признак прерывания
-
-  }
-}*/
-
-
+    
+}
 /*********************************************************************************************************
       END FILE
 *********************************************************************************************************/
