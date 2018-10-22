@@ -193,8 +193,7 @@ DECLARE_TASK(GSM_Ping);
 DECLARE_TASK(GSM_Start)
 {
 	printf("GSM_Start\r"); 
-	
-	GSM_Ping(); //Check state firstly 
+	TaskSuspend(GSM_Ping);
 	if(GSM_state_f == OFF)
 	{
 		PIN_OFF(GSM_ON_OFF);
@@ -202,32 +201,56 @@ DECLARE_TASK(GSM_Start)
 		T_Delay(3000);
 		PIN_ON(GSM_ON_OFF);
 		printf("PIN_ON\r"); 
-		T_Delay(1000);
+		T_Delay(500);
 	}		
+	TaskResume(GSM_Ping);
 }
 
 DECLARE_TASK(GSM_Call)
 {
-	printf("AT\r"); 
-	printf("ATD+380930893448;\r"); 
+	uint8_t AT[] = "ATD+380930893448;\r";
+	printf("GSM_Call\r\n");
+//	GSM_MsgSend(AT, sizeof(AT));
+	TaskSuspend(GSM_Call);
 }
+
+
 DECLARE_TASK(GSM_Ping)
 {
 	bool exit = false;
-	uint8_t AT[] = {"AT\r\n"};
+	uint8_t AT[] = {"AT\r"};
 	uint8_t msgBuff[50];
+	memset(msgBuff, 0, 50);
 
-		GSM_MsgSend(AT, sizeof(AT)); 
-		T_Delay(500);
-		GSM_MsgGet(msgBuff);
-		if(strstr(msgBuff, "OK") != 0) {GSM_state_f = ON; } //GSM - online and ON
-		else if (strstr(msgBuff, "AT") != 0) {GSM_state_f = OFF; } //GSM - online but OFF
-		else {GSM_state_f = OFFLINE;} //GSM - offline
-		printf("ping..%s \r\n",msgBuff); 
+		printf("ping..\r\n"); 
+	
+		GSM_MsgSend(AT, sizeof(AT));   //ATOMIC BUFFER
+		delay_ms(500);								 //ATOMIC BUFFER!!!
+		GSM_MsgGet(msgBuff);					 //ATOMIC BUFFER
+	
+		if(strstr(msgBuff, "OK") != 0) //GSM - online and ON
+		{
+			GSM_state_f = ON; 
+			SetTimerTaskInfin(GSM_Call, 0, 5000);
+			printf("GSM_OK\r\n"); 
+			return;
+		} 
+		else if (strstr(msgBuff, "AT") != 0) //GSM - online but OFF
+		{
+			GSM_state_f = OFF; 
+		} 
+		else //GSM - offline
+		{
+			GSM_state_f = OFFLINE;
+		} 
+		printf("%s \r\n",msgBuff); 
 		memset(msgBuff, 0, 50);	
 	
-	if(GSM_state_f != OFFLINE) {SetTimerTaskInfin(GSM_Start, 0, 0);}
-	if(GSM_state_f == ON) { printf("GSM_OK\r\n"); }
+	if(GSM_state_f != OFFLINE) 
+	{
+			SetTimerTaskInfin(GSM_Start, 500, 0);
+	}
+
 //	GSM_MsgSend("ATD+380930893448;\r\n"); 
 }
 

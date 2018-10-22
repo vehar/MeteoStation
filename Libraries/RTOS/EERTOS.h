@@ -139,7 +139,7 @@ return  err;
 */
 #endif
 
-enum TASK_STATUS {WAIT, RDY, IN_PROC, DONE, DEAD, DELAYED};
+enum TASK_STATUS {WAIT, RDY, IN_PROC, DONE, DEAD, DELAYED, SYSPENDED};
 
 enum SetTimerTask_Status {OK, QUEUE_FULL, TASK_REWRITTEN, TASK_ADDED, DEAD_TASK, TASK_SEND_MESSAGE, TASK_GOT_MESSAGE, TASK_NOT_FOUND};
 
@@ -226,6 +226,12 @@ extern void SetTimerTaskInfin(T_PTR TS, unsigned int Prolongation, unsigned int 
 	
 //Поставить задачу в очередь на немедленное выполнение
 extern void SetTask(T_PTR TS);
+
+//Поставить задачу на паузу
+extern void TaskSuspend(T_PTR TS);
+
+//Продолжить віполнение
+extern void TaskResume(T_PTR TS);
 
 //Поставить задачу в очередь на выполнение с задержкой в Prolongation и периодом NewPeriod
 extern U_ALU_INT SetTimerTask(T_PTR TS, unsigned int Prolongation, unsigned int NewPeriod);

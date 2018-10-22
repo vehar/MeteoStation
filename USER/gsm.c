@@ -20,11 +20,17 @@ void GSM_MsgSend(uint8_t* data_buff, uint8_t sz)
 int GSM_MsgGet(uint8_t* data_buff)
 {
 	int sz = GetAmount(&GSM_RX_BUFF);
+	uint8_t byte = 0;
+	uint8_t k = 0;
 	for(int i = 0; i<sz; i++)
 	{
-		data_buff[i] = ReadByte(&GSM_RX_BUFF);
+		byte = ReadByte(&GSM_RX_BUFF);
+		if(byte != 0) //Skip zero bytes inside string!
+		{
+			data_buff[k++] = byte;
+		}
 	}
-	return sz;
+	return k;
 }
 
 void GSM_IRQHandler(void)

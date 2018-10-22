@@ -392,6 +392,44 @@ void SetTimerTaskInfin(T_PTR TS, unsigned int Prolongation, unsigned int NewPeri
 }
 //===============================================================================================
 
+//TODO: debug!
+void TaskSuspend(T_PTR TS)
+{
+	uint8_t	 	index=0;
+ATOMIC_BLOCK_FORCEON
+ {
+   FOREACH_TASK
+    {
+      if(TTask[index].GoToTask == TS)
+      {
+        TTask[index].TStatus = SYSPENDED;  // 
+        NEED_TO_SORT = 1; //разрешить сортировку задач!
+        goto exit;//exit of for-cycle
+      }
+    }//end FOREACH_TASK
+exit: ;
+ }//end of  ATOMIC_BLOCK_
+}
+
+//TODO: debug!
+void TaskResume(T_PTR TS)
+{
+		uint8_t	 	index=0;
+ATOMIC_BLOCK_FORCEON
+ {
+   FOREACH_TASK
+    {
+      if(TTask[index].GoToTask == TS)
+      {
+        TTask[index].TStatus = WAIT;  // 
+        NEED_TO_SORT = 1; //разрешить сортировку задач!
+        goto exit;//exit of for-cycle
+      }
+    }//end FOREACH_TASK
+exit: ;
+ }//end of  ATOMIC_BLOCK_
+}
+
 //Функция установки задачи по таймеру. 
 //Передаваемые параметры: указатель на функцию, задержка перед 1-м запуском, период запуска(0-однократный запуск)
 // Время выдержки в тиках системного таймера. Возвращет код ошибки.
@@ -406,7 +444,7 @@ U_ALU_INT	result = QUEUE_FULL;
   {
 	if (TTask[index].GoToTask == TS)			// ищем заданый таймер
 	{   // Если задача не помечена как мёртвая(зависшая) утилитой KERNEL_CorpseService()...
-          if((TTask[index].TStatus != DEAD) && (TTask[index].TStatus != DELAYED))
+          if((TTask[index].TStatus != DEAD) && (TTask[index].TStatus != DELAYED) && (TTask[index].TStatus != SYSPENDED))
 	    { //..и если задача на задержке - перезаписывать статус НЕЛЬЗЯ иначе будет переполнение стека!!!
 			TTask[index].TDelay  = Prolongation;		// И поле выдержки времени
 			TTask[index].TPeriod = NewPeriod;	    // И поле периода запуска

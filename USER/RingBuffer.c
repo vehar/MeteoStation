@@ -14,7 +14,7 @@ uint8_t ReadByte(RingBuffer* pBuf)
 {
   if (IsEmpty(pBuf))
     return -1;
-  int result = pBuf->data[pBuf->first];
+  uint8_t result = pBuf->data[pBuf->first];
   pBuf->first = (pBuf->first + 1) & (BUFFER_SIZE - 1);
   return result;
 }
