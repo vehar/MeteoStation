@@ -489,9 +489,9 @@ U_ALU_INT index = 0;
    {																		//Зависшие задачи никогда не станут выполняться
       switch (TTask[index].TStatus) //if((TTask[index].TStatus == WAIT) || (TTask[index].TStatus == DONE))// Если не выполнилась или выполнилась
       {
-	 case WAIT: //Ждёт запуска
-	 case DONE: //Отработала
-	 case RDY:  //Если задача вовремя не выполнилась
+				case WAIT: //Ждёт запуска
+				case DONE: //Отработала
+				case RDY:  //Если задача вовремя не выполнилась
 
              if(TTask[index].TDelay > 0)  // таймер не выщелкал, то
               {
@@ -505,7 +505,7 @@ U_ALU_INT index = 0;
                 TTask[index].run_me_cnt++;      //пора запустить задачу ++ раз
                #endif
               }
-           break;  //WAIT or DONE or RDY
+        break;  //WAIT or DONE or RDY
       default: break;
       }
     index++;

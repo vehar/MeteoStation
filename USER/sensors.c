@@ -1,12 +1,19 @@
 #include "sensors.h"
+#include "stm32_GPIO.h"
+#include "mesh.h"
 
-float DS18b20_temp = 0;
-float TCoupleData = 0;	
+#include "debug.h"
+
+uint8_t Rxdh_T = 0;
+uint8_t Rxdh_H = 0;
 int dh_T = 0;
 int dh_H = 0;
-uint16_t co2 = 0;
-float internalTemp = 0;
+uint16_t RxdustLvl = 0;
 uint16_t dustLvl = 0;
+uint16_t co2 = 0;
+float DS18b20_temp = 0;
+float TCoupleData = 0;	
+float internalTemp = 0;
 
 uint8_t ROM_SN[One_Wire_Device_Number_MAX][DS1822_SERIAL_NUM_SIZE];
 uint8_t devices_cnt = 0;
@@ -77,14 +84,14 @@ DECLARE_TASK(Ds18b20_Search)
 
 	if(verboseOutput)
 	{	
-		printf("Found %d sensor(s) \r\n", devices_cnt);
+		DEBUGMSG("Found %d sensor(s) \r\n", devices_cnt);
 			
 		for (cnt=0; cnt!=devices_cnt; cnt++)
 		{
 			unsigned char cnt2;
-			printf("Sensor %d  serial number: ", cnt);
+			DEBUGMSG("Sensor %d  serial number: ", cnt);
 			for (cnt2=0; cnt2!=8; cnt2++) uart_print_hex_value (USART1, ROM_SN[cnt][cnt2]);
-			printf("\r\n");
+			DEBUGMSG("\r\n");
 		}
 	}
 	
@@ -115,6 +122,7 @@ DECLARE_TASK(Ds18b20_ReguestTemp)
 DECLARE_TASK(Ds18b20_Hndl)
 {
 	__disable_irq ();
+	memset(DS_Arr, 0xFF, 128);
 	/*
 if(verboseOutput)
 {	
@@ -177,8 +185,6 @@ DECLARE_TASK(VibroSensor_Hndl)
 
 }	
 
-#include "stm32_GPIO.h"
-
 DECLARE_TASK(DustSensor_Hndl)
 {
 	static uint8_t runCnt = 0;
@@ -210,3 +216,49 @@ DECLARE_TASK(DustSensor_Hndl)
 	__enable_irq ();
 }
 
+DECLARE_TASK(InfoOut_T)
+{	
+	if(verboseOutput)
+	{	
+		DEBUGMSG(" \r\n\r\n"); 
+	
+		DEBUGMSG("---------Temperature---------\r\n"); 
+		for (uint8_t cnt=0; cnt!=devices_cnt; cnt++)
+		{
+			DS18b20_temp = DS_Arr[cnt];
+			DEBUGMSG("DS_n: %d - T:%2.2f \r\n", cnt, DS18b20_temp);
+		}
+		 
+		DEBUGMSG("TC T:%2.2f \r\n", TCoupleData); 
+		
+		//if(dh_T == 0xFFFFFC00){ printf("DHT11 T: ---\r\n"); }
+		//else { printf("DHT11 T: %i\r\n", dh_T); }
+		
+		DEBUGMSG("Internal:%f \r\n", internalTemp); 
+			
+		//printf("---------Humidity---------\r\n"); 
+		
+		//if(dh_H == 0xFFFFFC00){ printf("DHT11 H: ---\r\n"); }
+		//else { printf("DHT11 H: %i\r\n", dh_H); }
+			
+		DEBUGMSG("---------Gas_level---------\r\n"); 	
+		DEBUGMSG("CO2:%d \r\n", co2); 
+		
+		if(RemoteConnected)
+		{
+			DEBUGMSG("---------Remote sensor data---------\r\n"); 
+			DEBUGMSG(" dustLvl:%d \r\n", RxdustLvl); 				
+		
+			if(Rxdh_T == 0xFFFFFC00){ DEBUGMSG("\t DHT11 T: ---\r\n"); }
+			else { DEBUGMSG(" DHT11 T: %i\r\n", Rxdh_T); }
+			if(Rxdh_H == 0xFFFFFC00){ DEBUGMSG("\t DHT11 H: ---\r\n"); }
+			else { DEBUGMSG(" DHT11 H: %i\r\n", Rxdh_H); }
+		}
+	
+	DEBUGMSG(" \r\n\r\n"); 			
+	}
+	else
+	{
+			DEBUGMSG("$%d, %d, %d, %d, %d, %d;", (int)(DS_Arr[0]*100), (int)(TCoupleData*100), (int)(Rxdh_T*100),(int)Rxdh_H, (int)(co2), 1);
+	}// VERBOSE_OUTPUT	
+}	

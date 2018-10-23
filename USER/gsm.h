@@ -5,7 +5,10 @@
 #include <stm32f10x.h>
 #include <stm32f10x_dma.h>
 #include "stm32f10x_usart.h"
+#include "macros.h"
+#include "init.h"
 #include "RingBuffer.h"
+#include "EERTOS.h"
 
 #define GSM_UART USART3
 #define GSM_IRQHandler USART3_IRQHandler
@@ -21,5 +24,10 @@ extern uint8_t GSM_state_f;
 
 int GSM_MsgGet(uint8_t* data_buff);	
 void GSM_MsgSend(uint8_t* data_buff, uint8_t sz);
+
+DECLARE_TASK(GSM_Actions);
+DECLARE_TASK(GSM_Ping);
+DECLARE_TASK(GSM_Call);
+DECLARE_TASK(GSM_On);
 
 #endif //_GSM_H_

@@ -2,6 +2,7 @@
 #include <stm32f10x_dma.h>
 #include "init.h"
 
+#include "debug.h"
 extern uint8_t verboseOutput;
 
 //http://www.avislab.com/blog/stm32-rtc/

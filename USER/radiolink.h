@@ -4,8 +4,10 @@
 #include <stm32f10x.h>
 #include <stm32f10x_dma.h>
 #include "stm32f10x_usart.h"
-#include "RingBuffer.h"
+#include "macros.h"
 #include "init.h"
+#include "RingBuffer.h"
+#include "EERTOS.h"
 
 #define RADIO_UART USART1
 #define RADIO_IRQHandler USART1_IRQHandler
@@ -38,3 +40,6 @@ int Radio_MsgGet(RadioPack_t* pack, uint8_t* data_buff);
 int RadioB_MsgGet(uint8_t* data_buff);
 void RadioB_MsgSend(uint8_t* data_buff, uint8_t sz);
 void HC12_configBaud(int baud);
+
+DECLARE_TASK(RadioBroadcast_T);
+DECLARE_TASK(RadioRead_T);

@@ -1,46 +1,13 @@
-#include "radiolink.h"
-#include "RingBuffer.h"
-
 #include <stdio.h>
 #include <string.h>
+#include "radiolink.h"
+#include "RingBuffer.h"
+#include "mesh.h"
+
+#include "debug.h"
 
 RingBuffer Radio_RxBuff;
 RingBuffer Radio_TxBuff;
-
-struct u_id HostID;
-
-#define MMIO16(addr)  (*(volatile uint16_t *)(addr))
-#define MMIO32(addr)  (*(volatile uint32_t *)(addr))
-#define U_ID          0x1ffff7e8
-
-/* Read U_ID register */
-void uid_read(struct u_id *id)
-{
-    id->off0 = MMIO16(U_ID + 0x0);
-    id->off2 = MMIO16(U_ID + 0x2);
-    id->off4 = MMIO32(U_ID + 0x4);
-    id->off8 = MMIO32(U_ID + 0x8);
-}
-
-/* Returns true if IDs are the same */
-bool uid_cmp(struct u_id *id1, struct u_id *id2)
-{
-    return id1->off0 == id2->off0 &&
-           id1->off2 == id2->off2 &&
-           id1->off4 == id2->off4 &&
-           id1->off8 == id2->off8;
-}
-
-/*
-    struct u_id id1 = { 0x0, 0x1, 0x2, 0x3 };
-    struct u_id id2;
-    bool same_id;
-
-    uid_read(&id2);
-    same_id = uid_cmp(&id1, &id2);
-
-    printf("%s\n", same_id ? "equal" : "not equal");
-*/
 
 //48 FF 6C 06 50 77 51 49 43 35 20 87 HOST ID
 int sz = 0;
@@ -125,6 +92,82 @@ void HC12_configBaud(int baud)
 	delay_ms(500);
 	RadioB_MsgGet(buff);
 	PIN_ON(RADIO_SET);
+}
+
+DECLARE_TASK(RadioRead_T)
+{
+	float recievedInternalTemp = 0;
+	struct u_id slaveID;
+	struct u_id RXslaveID;
+	
+	memcpy(&slaveID, &Slave1IDArr, sizeof(Slave1IDArr));
+	
+	/*char t;
+	t = ReadByte(&Radio_RxBuff);
+	if(t != 0xFF){printf("%c", t);}*/
+	RadioPack_t pack;
+	memset(&pack, 0, sizeof(pack));
+	
+	uint16_t i = 0;
+	__disable_irq();
+	
+	//printf("GetAmount:%d \r\n", GetAmount(&Radio_RxBuff)); 
+	
+	if(GetAmount(&Radio_RxBuff) >= 25) //full pack recieved!
+	{		
+		for(int i = 0; i<=26; i++)
+		{
+			data_buff[i] = ReadByte(&Radio_RxBuff);
+		}		
+		memcpy(&pack, data_buff, 24);
+		RXslaveID = pack.senderId;
+		
+		if(pack.msgId == 0xBB) //From slave
+		{
+			if(uid_cmp(&RXslaveID, &slaveID))
+			{
+				if(!RemoteConnected)
+				{
+					DEBUGMSG("REMOTE \r\n"); 
+					DEBUGMSG("\t MAC:%x:%x:%x:%x \r\n", pack.senderId.off0, pack.senderId.off2, pack.senderId.off4, pack.senderId.off8); 
+					DEBUGMSG("\t ID:%x \r\n", pack.msgId); 
+					RemoteConnected = 1;
+				}
+				
+//				RxdustLvl = pack.data[0];
+//				Rxdh_T = pack.data[1];
+//				Rxdh_H = pack.data[2];			
+			}
+		}
+		else if((pack.msgId == 0xAA) && (MasterSync == 0)) //sunc vs master
+		{
+//			SetTimerTaskInfin(T_HeartBit, 0, 100);
+			ClearTimerTask(RadioRead_T); //Stop listening
+		}
+		//Radio_MsgGet(&pack, data_buff);
+		ClearBuf(&Radio_RxBuff);
+	}
+	__enable_irq();
+}
+
+DECLARE_TASK(RadioBroadcast_T)
+{
+	uint8_t data_buff[8];
+	for(int i = 0; i<8; i++){data_buff[i]=0;}	
+	if(IsMaster)
+	{
+		Radio_MsgSend(0xAA, data_buff);
+	}
+	else
+	{
+//		data_buff[0] = dustLvl;
+		//data_buff[1] = (uint8_t)internalTemp;
+		//data_buff[2] = (uint8_t)(internalTemp*100)>>2;
+//		data_buff[1] = dh_T;
+//		data_buff[2] = dh_H;
+		
+		Radio_MsgSend(0xBB, data_buff);
+	}
 }
 
 void RADIO_IRQHandler(void)

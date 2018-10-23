@@ -67,3 +67,4 @@ DECLARE_TASK(Ds18b20_ReguestTemp);
 DECLARE_TASK(Ds18b20_Search);
 
 DECLARE_TASK(DustSensor_Hndl);
+DECLARE_TASK(InfoOut_T);
