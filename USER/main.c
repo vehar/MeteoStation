@@ -7,6 +7,9 @@
 #include "gsm.h"
 #include "EERTOS.h"
 
+#include "Sim80xConfig.h"
+#include "Sim80x.h"
+
 #include "debug.h"
 
 #define VERBOSE_OUTPUT
@@ -48,7 +51,6 @@ int main(void)
 {
 	MeshInit();
 	
-	
 	ClearBuf(&Radio_RxBuff); 
 	Delay_Init();
 	GPIO_Configuration();
@@ -60,6 +62,11 @@ int main(void)
 	RTOS_timer_init();
   RunRTOS();
   __enable_irq ();
+
+	/*uint8_t CSQ[] = {"CSQ"};
+	AT_GSM_MsgSendV(CSQ,"?");
+	AT_GSM_MsgSendV(CSQ,"2,1");
+	AT_GSM_MsgSendV(CSQ,"3,1,","CONTYPE",",","GPRS");*/
 
 	
 //	 printf("CONFIG = %s\r\n", IsMaster ? "Host" : "Slave");
@@ -86,6 +93,8 @@ int main(void)
 		
 		//SetTimerTaskInfin(Humidity_Hndl, 0, 3000);
 	//	HC12_configBaud(1152);
+	//	SetTimerTaskInfin(GSM_FTP_Connect, 0, 100);
+	SetTimerTaskInfin(GSM_Lib, 0, 0);
 		
 		SetTimerTaskInfin(GSM_Actions, 0, 1000);
 		SetTimerTaskInfin(GSM_to_Radio, 0, 100);

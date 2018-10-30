@@ -15,6 +15,13 @@
 #define GSM_TX_BUFF Gsm_TxBuff
 #define GSM_RX_BUFF Gsm_RxBuff
 
+//#define GENERATE_ARR(NAM,...) char arr_##NAM[]=__VA_ARGS__
+
+#define CMDR(cmd,...)         char _##cmd[]=#cmd###__VA_ARGS__
+#define CMD(cmd)         char _##cmd[]=#cmd
+
+#define ARG(cmd,args)			_##cmd##args
+	
 extern RingBuffer Gsm_RxBuff;
 extern RingBuffer Gsm_TxBuff;
 
@@ -22,12 +29,19 @@ enum GSM_state{ON, OFF, OFFLINE};
 
 extern uint8_t GSM_state_f;
 
-int GSM_MsgGet(uint8_t* data_buff);	
-void GSM_MsgSend(uint8_t* data_buff, uint8_t sz);
+void AT_GSM_MsgSend(char* data_buff, uint8_t sz);
+	
+int GSM_MsgGet(char* data_buff);	
+void AT_GSM_MsgSendV(char* data_buff, ...);
+void GSM_MsgSend(char* data_buff, uint8_t sz);
 
+DECLARE_TASK(GSM_FTP_Connect);
 DECLARE_TASK(GSM_Actions);
 DECLARE_TASK(GSM_Ping);
 DECLARE_TASK(GSM_Call);
 DECLARE_TASK(GSM_On);
+
+DECLARE_TASK(GSM_Lib);
+
 
 #endif //_GSM_H_

@@ -71,13 +71,9 @@
 
 	#define	inline __inline //for KEIL
 			
-		
 	void itoa(int n, char s[]);
 	void reverse(char s[]);
 	void ltoa(long int n,char *str) ;
-
-
-
 
 	#define bit uint8_t
 	typedef unsigned int U_ALU_INT; //for better different cpu-types compiller compability
@@ -85,8 +81,6 @@
 
 	//extern uint8_t tmp_status_reg = 0;
 	//extern uint8_t tmp_Interrupt_Flag = 0;
-
-
 
 	#define STATUS_REG 	          	CPSR_
 	#define Interrupt_Flag		    I

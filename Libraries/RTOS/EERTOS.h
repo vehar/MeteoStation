@@ -3,7 +3,6 @@
 
 #include "EERTOSHAL.h"
 
-
 //#define USE_MINIMAL_DESIGN 
 
 //#define USE_FULL_DESIGN

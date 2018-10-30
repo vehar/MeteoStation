@@ -483,6 +483,21 @@
               <FileType>5</FileType>
               <FilePath>..\USER\gsm.h</FilePath>
             </File>
+            <File>
+              <FileName>mesh.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\USER\mesh.h</FilePath>
+            </File>
+            <File>
+              <FileName>mesh.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\USER\mesh.c</FilePath>
+            </File>
+            <File>
+              <FileName>debug.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\USER\debug.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
