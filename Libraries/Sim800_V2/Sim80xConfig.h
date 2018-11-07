@@ -18,7 +18,7 @@
 #define _SIM80X_USE_GPRS            1
 
 
-#define	_SIM80X_POWER_KEY_GPIO		  GSM_POWER_KEY_GPIO_Port
-#define	_SIM80X_POWER_KEY_PIN		    GSM_POWER_KEY_Pin
+//#define	_SIM80X_POWER_KEY_GPIO		  GSM_POWER_KEY_GPIO_Port
+//#define	_SIM80X_POWER_KEY_PIN		    GSM_POWER_KEY_Pin
 
 #endif

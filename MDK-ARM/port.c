@@ -1,9 +1,9 @@
 #include "port.h"
 #include "gsm.h"
 
-int HAL_GetTick()
+uint32_t HAL_GetTick()
 {
-	return 1;
+	return v_u32_SYS_TICK;
 }
 
 void osDelay(uint32_t delay_ticks)
@@ -19,4 +19,17 @@ void	Sim80x_SendString(char *str)
 void  Sim80x_SendRaw(uint8_t *Data, uint16_t len)
 {
 	GSM_MsgSend(Data, len);
+}
+
+
+void HAL_GPIO_WritePin(uint8_t PORT,uint8_t PIN, uint8_t mode)
+{
+	if(mode == GPIO_PIN_RESET)
+	{
+		PIN_OFF(GSM_ON_OFF);
+	}
+	else
+	{
+		PIN_ON(GSM_ON_OFF);
+	}
 }

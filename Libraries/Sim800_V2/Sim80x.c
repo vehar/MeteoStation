@@ -5,8 +5,9 @@
 Sim80x_t      Sim80x;
 osThreadId 		Sim80xTaskHandle;
 osThreadId 		Sim80xBuffTaskHandle;
-void 	        StartSim80xTask(void);
-void 	        StartSim80xBuffTask(void);
+//void 	        StartSim80xTask(void);
+//void 	        StartSim80xBuffTask(void);
+
 //######################################################################################################################
 //######################################################################################################################
 //######################################################################################################################
@@ -109,10 +110,10 @@ uint8_t     Sim80x_SendAtCommand(char *AtCommand,int32_t  MaxWaiting_ms,uint8_t 
 //######################################################################################################################
 void  Sim80x_InitValue(void)
 {
-  Sim80x_SendAtCommand("ATE1\r\n",200,1,"ATE1\r\r\nOK\r\n");
-  Sim80x_SendAtCommand("AT+COLP=1\r\n",200,1,"AT+COLP=1\r\r\nOK\r\n");
-  Sim80x_SendAtCommand("AT+CLIP=1\r\n",200,1,"AT+CLIP=1\r\r\nOK\r\n");
-  Sim80x_SendAtCommand("AT+FSHEX=0\r\n",200,1,"AT+FSHEX=0\r\r\nOK\r\n");
+//  Sim80x_SendAtCommand("ATE1\r\n",200,1,"ATE1\r\r\nOK\r\n"); //turn echo on
+//  Sim80x_SendAtCommand("AT+COLP=1\r\n",200,1,"AT+COLP=1\r\r\nOK\r\n");
+//  Sim80x_SendAtCommand("AT+CLIP=1\r\n",200,1,"AT+CLIP=1\r\r\nOK\r\n");
+//  Sim80x_SendAtCommand("AT+FSHEX=0\r\n",200,1,"AT+FSHEX=0\r\r\nOK\r\n");
   Sim80x_SendAtCommand("AT+CREG=1\r\n",200,1,"AT+CREG=1\r\r\nOK\r\n");
   Sim80x_SendAtCommand("AT+ECHO?\r\n",200,1,"\r\nOK\r\n");
   Gsm_MsgSetMemoryLocation(GsmMsgMemory_OnModule);
@@ -134,9 +135,22 @@ void  Sim80x_InitValue(void)
   #endif
   Sim80x_SendAtCommand("AT+CREG?\r\n",200,1,"\r\n+CREG:");  
 //  Sim80x_UserInit();
+	Sim80x_SendAtCommand("AT+SAPBR=3,1,\"CONTYPE\",\"GPRS\"\r\n",1000,1,"\r\nOK\r\n");
+	Sim80x_SendAtCommand("AT+SAPBR=3,1,\"APN\",\"internet\"\r\n",1000,1,"\r\nOK\r\n");
+	Sim80x_SendAtCommand("AT+SAPBR=3,1,\"USER\",\"\"\r\n",1000,1,"\r\nOK\r\n");
+	Sim80x_SendAtCommand("AT+SAPBR=3,1,\"PWD\",\"\"\r\n",1000,1,"\r\nOK\r\n");
+	Sim80x_SendAtCommand("AT+SAPBR=1,1\r\n",10000,1,"\r\nOK\r\n");
+	Sim80x_SendAtCommand("AT+FTPCID=1\r\n",10000,1,"\r\nOK\r\n");
+	Sim80x_SendAtCommand("AT+FTPSERV=\"simcom.exavault.com\"\r\n",1000,1,"\r\nOK\r\n");
+	Sim80x_SendAtCommand("AT+FTPUN=\"zyf\"\r\n",1000,1,"\r\nOK\r\n");
+	Sim80x_SendAtCommand("AT+FTPPW=\"zyf\"\r\n",1000,1,"\r\nOK\r\n");
 	
-	GPRS_ConnectToNetwork("internet","","",false);
-  GPRS_HttpGet("www.google.com");  
+	Sim80x_SendAtCommand("AT+FTPGETNAME=\"12.txt\"\r\n",1000,1,"\r\nOK\r\n");
+	Sim80x_SendAtCommand("AT+FTPGETPATH=\"/\"\r\n",1000,1,"\r\nOK\r\n");
+	Sim80x_SendAtCommand("AT+FTPGET=1\r\n",1000,1,"\r\nOK\r\n");
+	Sim80x_SendAtCommand("AT+FTPGET=2,1024\r\n",1000,1,"\r\nOK\r\n");
+	//GPRS_ConnectToNetwork("internet","","",false);
+  //GPRS_HttpGet("www.google.com");  
 }
 //######################################################################################################################
 void   Sim80x_SaveParameters(void)
@@ -162,6 +176,7 @@ void  Sim80x_SetPower(bool TurnOn)
     }
     else
     {     
+			printf("\r\nSim80x_SetPower(ON) ---> FAIL\r\n");
       #if (_SIM80X_USE_POWER_KEY==1)  
       HAL_GPIO_WritePin(_SIM80X_POWER_KEY_GPIO,_SIM80X_POWER_KEY_PIN,GPIO_PIN_RESET);
       osDelay(1200);
@@ -198,6 +213,10 @@ void  Sim80x_SetPower(bool TurnOn)
       Sim80x_SendAtCommand("AT+CPOWD=1\r\n",2000,1,"\r\nOK\r\n"); 
       #endif      
     }
+		else
+		{
+			printf("\r\nSim80x_SetPower(OFF) ---> FAIL\r\n");
+		}
   }  
 }
 //######################################################################################################################
@@ -601,14 +620,17 @@ void	Sim80x_Init(osPriority Priority)
   osThreadDef(Sim80xBuffTask, StartSim80xBuffTask, Priority, 0, 256);
   Sim80xBuffTaskHandle = osThreadCreate(osThread(Sim80xBuffTask), NULL);
 */
-	SetTimerTaskInfin(StartSim80xTask, 0, 50);
-	SetTimerTaskInfin(StartSim80xBuffTask, 0, 50);
+	//SetTimerTaskInfin(StartSim80xTask, 0, 1);
+	//SetTimerTaskInfin(StartSim80xBuffTask, 0, 1);
 	
-  for(uint8_t i=0 ;i<10 ;i++)  
+	if(TaskExist(StartSim80xTask) == 0) {printf("\r\StartSim80xTask ---> ERROR\r\n");}
+	if(TaskExist(StartSim80xBuffTask) == 0) {printf("\r\StartSim80xBuffTask ---> ERROR\r\n");}
+	
+  for(uint8_t i=0 ;i<5 ;i++)  
   {
     if(Sim80x_SendAtCommand("AT\r\n",200,1,"AT\r\r\nOK\r\n") == 1)
       break;
-    osDelay(200);
+    osDelay(400);
   }  
   Sim80x_SetPower(true); 
 }
@@ -1281,7 +1303,7 @@ void StartSim80xBuffTask(void)
       Sim80x_BufferProcess();      
       Sim80x.BufferExeTime = HAL_GetTick()-Sim80x.BufferStartTime;
     }
-    osDelay(10);
+ //   osDelay(10);
 //  }    
 }
 //######################################################################################################################

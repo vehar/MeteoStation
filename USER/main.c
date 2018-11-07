@@ -94,9 +94,10 @@ int main(void)
 		//SetTimerTaskInfin(Humidity_Hndl, 0, 3000);
 	//	HC12_configBaud(1152);
 	//	SetTimerTaskInfin(GSM_FTP_Connect, 0, 100);
-	SetTimerTaskInfin(GSM_Lib, 0, 0);
 		
-		SetTimerTaskInfin(GSM_Actions, 0, 1000);
+	SetTimerTaskInfin(GSM_Lib, 10, 0);
+		
+//		SetTimerTaskInfin(GSM_Actions, 0, 1000);
 		SetTimerTaskInfin(GSM_to_Radio, 0, 100);
 		SetTimerTaskInfin(Radio_to_GSM, 0, 150);
 		//SetTimerTaskInfin(DustSensor_Hndl, 0, 100);
@@ -124,6 +125,9 @@ DECLARE_TASK(T_HeartBit)
 	//	else{PIN_OFF(MAPPLE_LED);}
 	}
 	t = !t;
+	
+	if(TaskExist(StartSim80xTask) == 0) {DEBUGFMSG("\r\StartSim80xTask ---> ERROR\r\n");}
+	if(TaskExist(StartSim80xBuffTask) == 0) {DEBUGFMSG("\r\StartSim80xBuffTask ---> ERROR\r\n");}
 }	 
 
 DECLARE_TASK(GSM_to_Radio)

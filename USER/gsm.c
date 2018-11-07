@@ -10,9 +10,18 @@ uint8_t GSM_state_f = OFFLINE;
 RingBuffer Gsm_RxBuff;
 RingBuffer Gsm_TxBuff;
 
+DECLARE_TASK(GSM_LibInit);
 DECLARE_TASK(GSM_Lib)
 {
+	SetTimerTaskInfin(StartSim80xTask, 0, 100);
+	SetTimerTaskInfin(StartSim80xBuffTask, 0, 10);
+	SetTimerTaskInfin(GSM_LibInit, 100, 0);
+}
+
+DECLARE_TASK(GSM_LibInit)
+{
 	Sim80x_Init(1);
+	Sim80x_InitValue();
 }
 
 DECLARE_TASK(GSM_On)

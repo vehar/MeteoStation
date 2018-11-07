@@ -185,7 +185,7 @@ bool  GPRS_HttpGet(char *URL)
   uint16_t timeout;
   uint8_t answer;
   char str[100];
-  answer = Sim80x_SendAtCommand("AT+SAPBR=3,1,\"Contype\",\"GPRS\"\r\n",1000,1,"\r\nOK\r\n");
+  answer = Sim80x_SendAtCommand("AT+SAPBR=3,1,\"CONTYPE\",\"GPRS\"\r\n",1000,1,"\r\nOK\r\n");
   if(answer!=1)
     goto Error;
   answer = Sim80x_SendAtCommand("AT+SAPBR=1,1\r\n",10000,1,"\r\nOK\r\n");

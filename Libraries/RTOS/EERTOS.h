@@ -229,8 +229,11 @@ extern void SetTask(T_PTR TS);
 //Поставить задачу на паузу
 extern void TaskSuspend(T_PTR TS);
 
-//Продолжить віполнение
+//Продолжить выполнение
 extern void TaskResume(T_PTR TS);
+
+//Существует ли задача
+extern uint8_t TaskExist(T_PTR TS);
 
 //Поставить задачу в очередь на выполнение с задержкой в Prolongation и периодом NewPeriod
 extern U_ALU_INT SetTimerTask(T_PTR TS, unsigned int Prolongation, unsigned int NewPeriod);

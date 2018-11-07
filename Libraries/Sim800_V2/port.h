@@ -5,13 +5,17 @@
 #include "EERTOS.h"
 #include "gsm.h"
 
-#define HAL_GPIO_WritePin(_SIM80X_POWER_KEY_GPIO,_SIM80X_POWER_KEY_PIN,GPIO_PIN_RESET) PIN_OFF(GSM_ON_OFF)
-#define HAL_GPIO_WritePin(_SIM80X_POWER_KEY_GPIO,_SIM80X_POWER_KEY_PIN,GPIO_PIN_SET) PIN_ON(GSM_ON_OFF)
+#define _SIM80X_POWER_KEY_GPIO (1)
+#define _SIM80X_POWER_KEY_PIN (2)
+#define GPIO_PIN_SET (3)
+#define GPIO_PIN_RESET (4)
 
+void HAL_GPIO_WritePin(uint8_t PORT,uint8_t PIN, uint8_t mode);
+	
 typedef int osPriority;
 typedef int osThreadId;
 
-int HAL_GetTick();
+uint32_t HAL_GetTick();
 void	Sim80x_SendString(char *str);
 void  Sim80x_SendRaw(uint8_t *Data,uint16_t len);
 
