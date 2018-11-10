@@ -8,6 +8,8 @@ uint8_t Slave1IDArr[12] = {0x52, 0xFF, 0x70, 0x06, 0x49, 0x84, 0x55, 0x50, 0x12,
 
 uint8_t data_buff[27];
 
+meshPacket mData[NODES_CNT];
+
 bool IsMaster = false;
 bool RemoteConnected = false;
 bool MasterSync = false;
@@ -46,6 +48,8 @@ bool MeshInit()
 //	DEBUGFMSG("");
 	
 	struct u_id idn;	
+	memset(mData, 0, sizeof(meshPacket)*NODES_CNT);
+	
 	uid_read(&HostID);
 	memcpy(&idn, &HostIDArr, sizeof(HostIDArr));
   IsMaster = uid_cmp(&HostID, &idn);

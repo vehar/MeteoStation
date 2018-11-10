@@ -4,6 +4,7 @@
 
 #include "radiolink.h"
 
+#define NODES_CNT 16
 #define MMIO16(addr)  (*(volatile uint16_t *)(addr))
 #define MMIO32(addr)  (*(volatile uint32_t *)(addr))
 #define U_ID          0x1ffff7e8
@@ -24,5 +25,15 @@ bool uid_cmp(struct u_id *id1, struct u_id *id2);
 void uid_read(struct u_id *id);
 
 bool MeshInit();
+
+typedef struct 
+{
+	uint8_t senderId;
+	uint8_t nodeId;
+	uint8_t data;
+	uint32_t timestamp;
+} meshPacket;
+
+extern meshPacket mData[16];
 
 #endif //_MESH_H_

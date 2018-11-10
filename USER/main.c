@@ -9,6 +9,7 @@
 
 #include "Sim80xConfig.h"
 #include "Sim80x.h"
+#include "pms.h"
 
 #include "debug.h"
 
@@ -41,6 +42,19 @@ int fputc(int ch, FILE *f)
 	//uart_send_char(USART3, ch); //GSM uart
   return(ch);
 }  
+
+PMS_DATA* data;
+uint8_t pms_msg[20];
+
+DECLARE_TASK(PmsRead)
+{
+  if (PMS_read(data, pms_msg))
+  {
+    printf("PM 1.0 (ug/m3): %i\r\n", data->PM_AE_UG_1_0);
+    printf("PM 2.5 (ug/m3): %i\r\n", data->PM_AE_UG_2_5);
+    printf("PM 10.0 (ug/m3): %i\r\n", data->PM_AE_UG_10_0);
+  }
+}
 
 //TODO: add stm temperature + calibration
 //TODO: add vibro and butt IRQ
@@ -95,7 +109,8 @@ int main(void)
 	//	HC12_configBaud(1152);
 	//	SetTimerTaskInfin(GSM_FTP_Connect, 0, 100);
 		
-	SetTimerTaskInfin(GSM_Lib, 10, 0);
+		SetTimerTaskInfin(PmsRead, 10, 1000);
+	//SetTimerTaskInfin(GSM_Lib, 10, 0);
 		
 //		SetTimerTaskInfin(GSM_Actions, 0, 1000);
 		SetTimerTaskInfin(GSM_to_Radio, 0, 100);
