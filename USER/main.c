@@ -16,7 +16,7 @@
 #define VERBOSE_OUTPUT
 
 uint8_t verboseOutput = 0;
-
+ 
 FILE __stdout;
 FILE __stdin;
 #ifdef __GNUC__
