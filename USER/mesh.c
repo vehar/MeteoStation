@@ -10,6 +10,8 @@ uint8_t data_buff[27];
 
 meshPacket mData[NODES_CNT];
 
+SensorFile_t sFile;
+
 bool IsMaster = false;
 bool RemoteConnected = false;
 bool MasterSync = false;
@@ -52,6 +54,8 @@ bool MeshInit()
 	
 	uid_read(&HostID);
 	memcpy(&idn, &HostIDArr, sizeof(HostIDArr));
+	memcpy(&sFile.senderId, &HostID, sizeof(HostID));
+	
   IsMaster = uid_cmp(&HostID, &idn);
 	return IsMaster;
 }

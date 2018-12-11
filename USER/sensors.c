@@ -1,8 +1,8 @@
 #include "sensors.h"
 #include "stm32_GPIO.h"
-#include "mesh.h"
-
 #include "debug.h"
+#include <stm32f10x.h>
+
 
 uint8_t Rxdh_T = 0;
 uint8_t Rxdh_H = 0;
@@ -188,8 +188,10 @@ DECLARE_TASK(GetInternalsParams)
 		internalTemp += 14;
 	
 		battVolt = getAdcVolt();//Voltage
+		//Time
 	
-	//Time
+		sFile.IntTemp = internalTemp;
+		sFile.IntBatt = battVolt;
 }
 
 DECLARE_TASK(GasSensor_Hndl)

@@ -36,4 +36,11 @@ typedef struct
 
 extern meshPacket mData[16];
 
+typedef struct {
+  struct u_id senderId;
+  uint8_t data[8];
+  uint8_t IntTemp;
+  uint8_t IntBatt;
+} SensorFile_t;
+
 #endif //_MESH_H_

@@ -12,6 +12,7 @@
 #include "GLCD.h"
 #include "strings.h"
 #include "dht11.h"
+#include "mesh.h"
 
 #include "EERTOS.h"
 
@@ -42,6 +43,7 @@
 #define DUST_PIN_LED_PWM  B, 4, HIGH, MODE_OUTPUT_PUSH_PULL, SPEED_2MHZ	
 #define DUST_PIN_ANALOG   A, 0, HIGH, MODE_INPUT_FLOATING, SPEED_2MHZ
 
+extern SensorFile_t sFile;
 
 extern float DS18b20_temp;
 extern float TCoupleData;	
