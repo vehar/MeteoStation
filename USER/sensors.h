@@ -49,6 +49,7 @@ extern int dh_T;
 extern int dh_H;
 extern uint16_t co2;
 extern float internalTemp;
+extern float battVolt;
 extern uint16_t dustLvl;
 
 extern uint8_t ROM_SN[One_Wire_Device_Number_MAX][DS1822_SERIAL_NUM_SIZE];
@@ -60,6 +61,7 @@ unsigned char One_Wire_Error_Handle (unsigned char err);
 
 DECLARE_TASK(VibroSensor_Hndl);
 DECLARE_TASK(GasSensor_Hndl);
+DECLARE_TASK(GetInternalsParams);
 DECLARE_TASK(Humidity_Hndl);
 DECLARE_TASK(TermoCoupe_Hndl);
 DECLARE_TASK(Ds18b20_Hndl);

@@ -89,6 +89,7 @@ int main(void)
 	//SetTimerTaskInfin(RadioBroadcast_T, 0, 1000);	
 	
 	SetTimerTaskInfin(T_HeartBit, 0, 1000);
+	SetTimerTaskInfin(GetInternalsParams, 0, 1000);
 	
 	if(IsMaster)
 	{	
@@ -109,10 +110,11 @@ int main(void)
 	//	HC12_configBaud(1152);
 	//	SetTimerTaskInfin(GSM_FTP_Connect, 0, 100);
 		
-		SetTimerTaskInfin(PmsRead, 10, 1000);
+//		SetTimerTaskInfin(PmsRead, 10, 1000);
 	//SetTimerTaskInfin(GSM_Lib, 10, 0);
 		
 //		SetTimerTaskInfin(GSM_Actions, 0, 1000);
+
 		SetTimerTaskInfin(GSM_to_Radio, 0, 100);
 		SetTimerTaskInfin(Radio_to_GSM, 0, 150);
 		//SetTimerTaskInfin(DustSensor_Hndl, 0, 100);

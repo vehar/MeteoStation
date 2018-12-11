@@ -260,7 +260,7 @@ void Adc_Init()
  ADC_Cmd(ADC1, ENABLE);
  
  //Channel settings
- //ADC_RegularChannelConfig(ADC1, ADC_Channel_8, 1, ADC_SampleTime_55Cycles5);
+ //ADC_RegularChannelConfig(ADC1, ADC_Channel_7, 1, ADC_SampleTime_55Cycles5); //A7
  //ADC_RegularChannelConfig(ADC1, ADC_Channel_16, 2, ADC_SampleTime_239Cycles5); //Internal temperature
 	
  ADC_ResetCalibration(ADC1);
