@@ -6,6 +6,7 @@
 #include "mesh.h"
 #include "gsm.h"
 #include "EERTOS.h"
+#include "rtc.h"
 
 #include "Sim80xConfig.h"
 #include "Sim80x.h"
@@ -70,6 +71,7 @@ int main(void)
 	GPIO_Configuration();
 	USART_Configuration();
 	Adc_Init();
+	RTC_config();
 	
 	DEBUGFMSG("Init done");
 	
@@ -88,6 +90,20 @@ int main(void)
 	//SetTimerTaskInfin(RadioRead_T, 0, 100);
 	//SetTimerTaskInfin(RadioBroadcast_T, 0, 1000);	
 	
+/*	
+	ftime.day = 1;
+	ftime.month = 2;
+	ftime.year = 2018;
+	ftime.hour = 3;
+	ftime.minute = 4;
+	ftime.second = 0;
+	
+	// Change the current time 
+	RTC_SetCounter(FtimeToCounter());
+	// Wait until last write operation on RTC registers has finished 
+	RTC_WaitForLastTask();
+*/	
+												
 	SetTimerTaskInfin(T_HeartBit, 0, 1000);
 	SetTimerTaskInfin(GetInternalsParams, 0, 1000);
 	
@@ -145,6 +161,9 @@ DECLARE_TASK(T_HeartBit)
 	
 	if(TaskExist(StartSim80xTask) == 0) {DEBUGFMSG("\r\StartSim80xTask ---> ERROR\r\n");}
 	if(TaskExist(StartSim80xBuffTask) == 0) {DEBUGFMSG("\r\StartSim80xBuffTask ---> ERROR\r\n");}
+	
+	sFile.rtcRaw = RTC_GetCounter();
+	CounterToFtime(sFile.rtcRaw);
 }	 
 
 DECLARE_TASK(GSM_to_Radio)

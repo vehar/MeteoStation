@@ -374,7 +374,7 @@
               <MiscControls></MiscControls>
               <Define></Define>
               <Undefine></Undefine>
-              <IncludePath>..\Libraries\CMSIS\CM3\CoreSupport;..\Libraries\CMSIS\CM3\DeviceSupport\ST\STM32F10x\startup\arm;..\Libraries\STM32F10x_StdPeriph_Driver\inc;..\Libraries\STM32F10x_StdPeriph_Driver\src;..\USER;..\Libraries\CMSIS\CM3\DeviceSupport\ST\STM32F10x;..\Libraries\DS1822;..\Libraries\1-Wire;..\Libraries\GPIO;..\Libraries\Serial;..\Libraries\GLCD;..\Libraries\SysTick;..\Libraries\Strings;..\Libraries\DHT11_22;..\Libraries\RTOS;..\Libraries\Sim800_V2;..\Libraries\PMS</IncludePath>
+              <IncludePath>..\Libraries\CMSIS\CM3\CoreSupport;..\Libraries\CMSIS\CM3\DeviceSupport\ST\STM32F10x\startup\arm;..\Libraries\STM32F10x_StdPeriph_Driver\inc;..\Libraries\STM32F10x_StdPeriph_Driver\src;..\USER;..\Libraries\CMSIS\CM3\DeviceSupport\ST\STM32F10x;..\Libraries\DS1822;..\Libraries\1-Wire;..\Libraries\GPIO;..\Libraries\Serial;..\Libraries\GLCD;..\Libraries\SysTick;..\Libraries\Strings;..\Libraries\DHT11_22;..\Libraries\RTOS;..\Libraries\Sim800_V2;..\Libraries\PMS;..\Libraries\RTC</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -842,6 +842,21 @@
               <FileName>pms.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\Libraries\PMS\pms.h</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>RTC</GroupName>
+          <Files>
+            <File>
+              <FileName>RTC.C</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Libraries\RTC\RTC.C</FilePath>
+            </File>
+            <File>
+              <FileName>RTC.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Libraries\RTC\RTC.h</FilePath>
             </File>
           </Files>
         </Group>
