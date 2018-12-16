@@ -18,6 +18,8 @@ extern RingBuffer Radio_RxBuff;
 extern RingBuffer Radio_TxBuff;
 extern struct u_id HostID;
 
+#pragma push
+#pragma pack(1)
 struct u_id {
     uint16_t off0;
     uint16_t off2;
@@ -26,11 +28,12 @@ struct u_id {
 };
 
 typedef struct {
-  struct u_id senderId;
-  uint8_t data[8];
   uint8_t msgId;
+	struct u_id senderId; //12
+	uint8_t data[8];
   uint8_t crc;
 } RadioPack_t;
+#pragma pop
 
 extern bool uid_cmp(struct u_id *id1, struct u_id *id2);
 extern void uid_read(struct u_id *id);

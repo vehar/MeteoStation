@@ -106,6 +106,7 @@ int main(void)
 												
 	SetTimerTaskInfin(T_HeartBit, 0, 1000);
 	SetTimerTaskInfin(GetInternalsParams, 0, 1000);
+  SetTimerTaskInfin(RadioBroadcast_T, 0, 4000);
 	
 	if(IsMaster)
 	{	
@@ -159,8 +160,8 @@ DECLARE_TASK(T_HeartBit)
 	}
 	t = !t;
 	
-	if(TaskExist(StartSim80xTask) == 0) {DEBUGFMSG("\r\StartSim80xTask ---> ERROR\r\n");}
-	if(TaskExist(StartSim80xBuffTask) == 0) {DEBUGFMSG("\r\StartSim80xBuffTask ---> ERROR\r\n");}
+//	if(TaskExist(StartSim80xTask) == 0) {DEBUGFMSG("\r\StartSim80xTask ---> ERROR\r\n");}
+//	if(TaskExist(StartSim80xBuffTask) == 0) {DEBUGFMSG("\r\StartSim80xBuffTask ---> ERROR\r\n");}
 	
 	sFile.rtcRaw = RTC_GetCounter();
 	CounterToFtime(sFile.rtcRaw);

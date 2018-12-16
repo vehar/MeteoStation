@@ -43,4 +43,5 @@ typedef struct {
   uint8_t IntBatt;
 } SensorFile_t;
 
+extern SensorFile_t sFile;
 #endif //_MESH_H_

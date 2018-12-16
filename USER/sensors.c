@@ -190,7 +190,7 @@ DECLARE_TASK(GetInternalsParams)
 		battVolt = getAdcVolt();//Voltage
 		//Time
 	
-		sFile.IntTemp = internalTemp;
+		sFile.IntTemp = internalTemp*3.6 + 70; //pack float to int (-19 .. +50)
 		sFile.IntBatt = battVolt;
 }
 

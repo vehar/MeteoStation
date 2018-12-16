@@ -25,15 +25,23 @@ int Radio_MsgSend(uint32_t msgId, uint8_t* data_buff)
 	pack.senderId = HostID;
 	pack.msgId = msgId;
 	memcpy(pack.data, data_buff, 8);
+	
+	WriteByte(&TX_BUFF, '$'); //Start
+	
 	elem_p = (uint8_t*)&pack;
-	for(int i = 0; i<sz; i++)
+	for(int i = 0; i<sz-1; i++)
 	{		
 		elem = *(elem_p+i);
 		crc ^= elem;
+		if(elem == 0){elem = 0xFF;}
 		WriteByte(&TX_BUFF, elem);
 	}
 	pack.crc = crc;
+	if(pack.crc == 0){pack.crc = 0xFF;}
 	WriteByte(&TX_BUFF, pack.crc);
+	
+	WriteByte(&TX_BUFF, ';'); //Stop
+	WriteByte(&TX_BUFF, 0); //Stop
 	
 	USART_SendData(RADIO_UART, ReadByte(&TX_BUFF));
 	USART_ITConfig(RADIO_UART, USART_IT_TC, ENABLE);
@@ -134,6 +142,7 @@ DECLARE_TASK(RadioRead_T)
 					RemoteConnected = 1;
 				}
 				
+				DEBUGMSG("\t GOT IntTemp :%x \r\n", pack.data[4]); 
 //				RxdustLvl = pack.data[0];
 //				Rxdh_T = pack.data[1];
 //				Rxdh_H = pack.data[2];			
@@ -153,15 +162,22 @@ DECLARE_TASK(RadioRead_T)
 DECLARE_TASK(RadioBroadcast_T)
 {
 	uint8_t data_buff[8];
-	for(int i = 0; i<8; i++){data_buff[i]=0;}	
+	//for(int i = 0; i<8; i++){data_buff[i]=0;}	
+	memset(data_buff, 0, 8);
 	if(IsMaster)
 	{
 		Radio_MsgSend(0xAA, data_buff);
 	}
 	else
 	{
-//		data_buff[0] = dustLvl;
-		//data_buff[1] = (uint8_t)internalTemp;
+		data_buff[0] = sFile.rtcRaw;
+		data_buff[1] = sFile.rtcRaw >> 8;
+		data_buff[2] = sFile.rtcRaw >> 16;
+		data_buff[3] = sFile.rtcRaw >> 24;
+	  data_buff[4] = sFile.IntTemp;
+		data_buff[5] = 0xA5;
+		data_buff[6] = 0xA6;
+		data_buff[7] = 0xA7;
 		//data_buff[2] = (uint8_t)(internalTemp*100)>>2;
 //		data_buff[1] = dh_T;
 //		data_buff[2] = dh_H;
