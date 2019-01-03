@@ -40,9 +40,7 @@ unsigned char RTC_Init(void)
 
 
 /////////////////////////////////
-
-
-void Spi_Init(void)
+void Spi2_Init(void)
 {
 //включаем тактирование порта B и альтернативных функций 
 	RCC->APB2ENR  |= RCC_APB2ENR_IOPBEN | RCC_APB2ENR_AFIOEN;   
@@ -57,7 +55,7 @@ void Spi_Init(void)
 	
     SPI2->CR1 |= SPI_CR1_BR;                //Baud rate = Fpclk/256
     SPI2->CR1 &= ~SPI_CR1_CPOL;             //Polarity cls signal CPOL = 0;
-	  SPI2->CR1 |= SPI_CR1_CPHA;             	//Sampled on the falling edge
+	SPI2->CR1 |= SPI_CR1_CPHA;             	//Sampled on the falling edge
     SPI2->CR1 |= SPI_CR1_DFF;               //16 bit data
     SPI2->CR1 &= ~SPI_CR1_LSBFIRST;         //MSB will be first
     SPI2->CR1 |= SPI_CR1_SSM | SPI_CR1_SSI;  //Software slave management & Internal slave select
@@ -107,19 +105,19 @@ GPIO_InitStructure.GPIO_Pin = GPIO_Pin_13;					    //USER KEY A
   GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING; 
   GPIO_Init(GPIOB, &GPIO_InitStructure);*/
 
-PIN_CONFIGURATION(POW_1v5_EN);
-//PIN_ON(POW_1v5_EN);
+	PIN_CONFIGURATION(POW_1v5_EN);
+	//PIN_ON(POW_1v5_EN);
 
-PIN_CONFIGURATION(POW_5v0_EN);
-PIN_ON(POW_5v0_EN);
+	PIN_CONFIGURATION(POW_5v0_EN);
+	PIN_ON(POW_5v0_EN);
 
-PIN_CONFIGURATION(GSM_ON_OFF);
-PIN_ON(GSM_ON_OFF);
+	PIN_CONFIGURATION(GSM_ON_OFF);
+	PIN_ON(GSM_ON_OFF);
 
-PIN_CONFIGURATION(RADIO_SET);
-PIN_ON(RADIO_SET);
+	PIN_CONFIGURATION(RADIO_SET);
+	PIN_ON(RADIO_SET);
 
-PIN_CONFIGURATION(USR_BTN);
+	PIN_CONFIGURATION(USR_BTN);
 	if(PIN_SIGNAL(USR_BTN) == 0)//Pressed on start
 	{
 		verboseOutput = 1;
@@ -128,22 +126,22 @@ PIN_CONFIGURATION(USR_BTN);
 
 void SysTikConfig(void)
 {
-RCC_ClocksTypeDef RCC_Clocks;
-RCC_GetClocksFreq(&RCC_Clocks);
-SysTick_Config(RCC_Clocks.HCLK_Frequency / 1000); //1ms	
+	RCC_ClocksTypeDef RCC_Clocks;
+	RCC_GetClocksFreq(&RCC_Clocks);
+	SysTick_Config(RCC_Clocks.HCLK_Frequency / 1000); //1ms	
 }
 
 void NVIC_Configuration(void)
 {
   /*
-	NVIC_InitTypeDef NVIC_InitStructure; 
+	NVIC_InitTypeDef NVIC_init; 
 	 
   NVIC_PriorityGroupConfig(NVIC_PriorityGroup_0);  													
-  NVIC_InitStructure.NVIC_IRQChannel = TIM2_IRQn;	  
-  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
-  NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;	
-  NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-  NVIC_Init(&NVIC_InitStructure);
+  NVIC_init.NVIC_IRQChannel = TIM2_IRQn;	  
+  NVIC_init.NVIC_IRQChannelPreemptionPriority = 0;
+  NVIC_init.NVIC_IRQChannelSubPriority = 0;	
+  NVIC_init.NVIC_IRQChannelCmd = ENABLE;
+  NVIC_Init(&NVIC_init);
 	*/
 }
 
@@ -170,75 +168,93 @@ void TIM_Configuration(void)
 */	
 }
 
-void USART_Configuration(void)
+void UART_Configuration(void)
 { 
-  GPIO_InitTypeDef GPIO_InitStructureTx;
-  GPIO_InitTypeDef GPIO_InitStructureRx;
-	
-  USART_InitTypeDef USART_InitStructure; 
-	
-  //Debug uart
-	
-  RCC_APB2PeriphClockCmd( RCC_APB2Periph_GPIOA | RCC_APB2Periph_USART1,ENABLE);
+  GPIO_InitTypeDef GPIO_Tx;
+  GPIO_InitTypeDef GPIO_Rx;	
+  USART_InitTypeDef UART; 
+  NVIC_InitTypeDef NVIC_init;	
   
-  /*
-  *  USART1_TX -> PA9 , USART1_RX ->	PA10
-  */
-	//PIN_CONFIGURATION(USART1_TX); //MODE_AF_PUSH_PULL check it!!!
-	//PIN_CONFIGURATION(USART1_RX);
-//*	
-  GPIO_InitStructureTx.GPIO_Pin = GPIO_Pin_9;	         
-  GPIO_InitStructureTx.GPIO_Mode = GPIO_Mode_AF_PP; 
-  GPIO_InitStructureTx.GPIO_Speed = GPIO_Speed_50MHz; 
-  GPIO_Init(GPIOA, &GPIO_InitStructureTx);		   
-
-  GPIO_InitStructureRx.GPIO_Pin = GPIO_Pin_10;	        
-  GPIO_InitStructureRx.GPIO_Mode = GPIO_Mode_IN_FLOATING;  
-  GPIO_InitStructureRx.GPIO_Speed = GPIO_Speed_50MHz; 
-  GPIO_Init(GPIOA, &GPIO_InitStructureRx);
-//*/
-	/* NVIC Configuration */
-	NVIC_InitTypeDef NVIC_InitStructure;
-	/* Enable the USARTx Interrupt */
-	NVIC_InitStructure.NVIC_IRQChannel = USART1_IRQn;
-	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
-	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
-	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-	NVIC_Init(&NVIC_InitStructure);
+  //PIN_CONFIGURATION(USART1_TX); //MODE_AF_PUSH_PULL check it!!!
+  //PIN_CONFIGURATION(USART1_RX);
 	
-  USART_InitStructure.USART_BaudRate = 9600; //115200 //9600
-  USART_InitStructure.USART_WordLength = USART_WordLength_8b;
-  USART_InitStructure.USART_StopBits = USART_StopBits_1;
-  USART_InitStructure.USART_Parity = USART_Parity_No;
-  USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
-  USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
+  // GPIO conf         
+  GPIO_Tx.GPIO_Mode = GPIO_Mode_AF_PP; 
+  GPIO_Tx.GPIO_Speed = GPIO_Speed_50MHz; 
+  GPIO_Rx.GPIO_Mode = GPIO_Mode_IN_FLOATING;  
+  GPIO_Rx.GPIO_Speed = GPIO_Speed_50MHz; 
+  // Enable the USARTx Interrupt 
+  NVIC_init.NVIC_IRQChannelPreemptionPriority = 0;
+  NVIC_init.NVIC_IRQChannelSubPriority = 0;
+  NVIC_init.NVIC_IRQChannelCmd = ENABLE;
+  // UART conf
+  UART.USART_BaudRate = 9600; //115200 //9600
+  UART.USART_WordLength = USART_WordLength_8b;
+  UART.USART_StopBits = USART_StopBits_1;
+  UART.USART_Parity = USART_Parity_No;
+  UART.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
+  UART.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
 
-  USART_Init(USART1, &USART_InitStructure); 
+  ///////////////////////////////////////////////////////////////////////////////////////////
+  //Radiolink uart
+  //USART1_TX -> PA9 , USART1_RX ->	PA10
+  RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_USART1,ENABLE);
+  
+  GPIO_Tx.GPIO_Pin = GPIO_Pin_9;	  
+  GPIO_Rx.GPIO_Pin = GPIO_Pin_10;
+  GPIO_Init(GPIOA, &GPIO_Tx);
+  GPIO_Init(GPIOA, &GPIO_Rx);
+
+  NVIC_init.NVIC_IRQChannel = USART1_IRQn;
+  NVIC_Init(&NVIC_init);
+	
+  USART_Init(USART1, &UART); 
   USART_ITConfig(USART1, USART_IT_RXNE, ENABLE);
-//  USART_ITConfig(USART1, USART_IT_TXE, ENABLE);
+  //USART_ITConfig(USART1, USART_IT_TXE, ENABLE);
   USART_Cmd(USART1, ENABLE);
   
-  //Radiolink uart
+  ///////////////////////////////////////////////
+  //PMS uart
   //USART2_TX -> PA2 , USART2_RX ->	PA3
-  //USART3_TX -> PB10 , USART2_RX ->	PB11
-  RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART3, ENABLE); 
+  RCC_APB1PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB1Periph_USART2, ENABLE); 
 	
-  GPIO_InitStructureTx.GPIO_Pin = GPIO_Pin_10;	         
-  GPIO_Init(GPIOB, &GPIO_InitStructureTx);		   
-  GPIO_InitStructureRx.GPIO_Pin = GPIO_Pin_11;	   
-  GPIO_Init(GPIOB, &GPIO_InitStructureRx);
+  GPIO_Tx.GPIO_Pin = GPIO_Pin_2;	         	   
+  GPIO_Rx.GPIO_Pin = GPIO_Pin_3;	
+  GPIO_Init(GPIOA, &GPIO_Tx);	  
+  GPIO_Init(GPIOA, &GPIO_Rx);
   
-  	/* NVIC Configuration */
-	/* Enable the USARTx Interrupt */
-	NVIC_InitStructure.NVIC_IRQChannel = USART3_IRQn;
-	NVIC_Init(&NVIC_InitStructure);
+  NVIC_init.NVIC_IRQChannel = USART2_IRQn;
+  NVIC_Init(&NVIC_init);
 	
-  USART_Init(USART3, &USART_InitStructure); 
+  USART_Init(USART2, &UART); 
+  USART_ITConfig(USART2, USART_IT_RXNE, ENABLE);
+  //USART_ITConfig(USART2, USART_IT_TXE, ENABLE);
+  USART_Cmd(USART2, ENABLE);
+  
+  //////////////////////////////////////////////
+  //GSM uart
+  //USART3_TX -> PB10 , USART2_RX -> PB11
+  RCC_APB1PeriphClockCmd(RCC_APB2Periph_GPIOB | RCC_APB1Periph_USART3, ENABLE); 
+	
+  GPIO_Tx.GPIO_Pin = GPIO_Pin_10;	         		   
+  GPIO_Rx.GPIO_Pin = GPIO_Pin_11;	 
+  GPIO_Init(GPIOB, &GPIO_Tx);  
+  GPIO_Init(GPIOB, &GPIO_Rx);
+  
+  NVIC_init.NVIC_IRQChannel = USART3_IRQn;
+  NVIC_Init(&NVIC_init);
+	
+  USART_Init(USART3, &UART); 
   USART_ITConfig(USART3, USART_IT_RXNE, ENABLE);
   //USART_ITConfig(USART3, USART_IT_TXE, ENABLE);
   USART_Cmd(USART3, ENABLE);
 }
 ///////////////////////////////////////////
+
+void I2C_Configuration(void)
+{
+	
+}
 
 void Adc_Init()  
 {

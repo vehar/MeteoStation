@@ -94,6 +94,7 @@ void HC12_configBaud(int baud)
 {
 	uint8_t buff[20];
 	memset(buff, 0, 20);
+	//TODO must be power off!
 	PIN_OFF(RADIO_SET);
 	delay_ms(1000);
 //	RadioB_MsgSend("AT\r\n");

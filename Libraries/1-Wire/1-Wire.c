@@ -47,16 +47,6 @@ void One_Wire_Write_Bit (unsigned char Bit,GPIO_TypeDef * GPIOx, u16 PINx)
 	Pin_In(GPIOx, PINx);
 } 
 
-unsigned char One_Wire_Read_Byte(GPIO_TypeDef * GPIOx, u16 PINx)
-{
-	unsigned char tmp=0;
-	unsigned char cnt;
-	for (cnt=0;cnt!=8;cnt++)
-		if (One_Wire_Read_Bit(GPIOx, PINx)!=0)	tmp|=(1<<cnt);
-	delay_us(Time_Pulse_Delay_High);
-	return tmp;
-}
-
 unsigned char One_Wire_Read_Bit (GPIO_TypeDef * GPIOx, u16 PINx)
 {
 		unsigned char tmp;
@@ -69,4 +59,14 @@ unsigned char One_Wire_Read_Bit (GPIO_TypeDef * GPIOx, u16 PINx)
 			else tmp = 0;
 		delay_us(Time_Pulse_Delay_High);
 		return tmp;
+}
+
+unsigned char One_Wire_Read_Byte(GPIO_TypeDef * GPIOx, u16 PINx)
+{
+	unsigned char tmp=0;
+	unsigned char cnt;
+	for (cnt=0;cnt!=8;cnt++)
+		if (One_Wire_Read_Bit(GPIOx, PINx)!=0)	tmp|=(1<<cnt);
+	delay_us(Time_Pulse_Delay_High);
+	return tmp;
 }

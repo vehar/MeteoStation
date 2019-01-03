@@ -10,7 +10,7 @@
       <TargetName>HY-MiniSTM32V</TargetName>
       <ToolsetNumber>0x4</ToolsetNumber>
       <ToolsetName>ARM-ADS</ToolsetName>
-      <pCCUsed>5060422::V5.06 update 4 (build 422)::ARMCC</pCCUsed>
+      <pCCUsed>5060300::V5.06 update 3 (build 300)::ARMCC</pCCUsed>
       <TargetOption>
         <TargetCommonOption>
           <Device>STM32F103RB</Device>
@@ -148,7 +148,7 @@
             <RestoreSysVw>1</RestoreSysVw>
           </Target>
           <RunDebugAfterBuild>0</RunDebugAfterBuild>
-          <TargetSelection>5</TargetSelection>
+          <TargetSelection>11</TargetSelection>
           <SimDlls>
             <CpuDll></CpuDll>
             <CpuDllArguments></CpuDllArguments>
@@ -497,6 +497,11 @@
               <FileName>debug.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\USER\debug.h</FilePath>
+            </File>
+            <File>
+              <FileName>pinmap.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\USER\pinmap.h</FilePath>
             </File>
           </Files>
         </Group>

@@ -3,7 +3,7 @@
   uint8_t 	_status = STATUS_WAITING;
   bool pms_data_available = false; 
 
-	uint8_t 	_mode;
+  uint8_t 	_mode;
   uint8_t 	_payload[12];
   uint8_t* 	_msgBuff;
   PMS_DATA* 		_data;

@@ -60,6 +60,7 @@ DECLARE_TASK(PmsRead)
 //TODO: add stm temperature + calibration
 //TODO: add vibro and butt IRQ
 //TODO: fix DHT_CS_ERROR for DHT
+// TODO: create stable master branch!!!!
 
 // http://we.easyelectronics.ru/STM32/stm32-usart-na-preryvaniyah-na-primere-rs485.html 
 int main(void)
@@ -69,7 +70,8 @@ int main(void)
 	ClearBuf(&Radio_RxBuff); 
 	Delay_Init();
 	GPIO_Configuration();
-	USART_Configuration();
+	UART_Configuration();
+	I2C_Configuration();
 	Adc_Init();
 	RTC_config();
 	

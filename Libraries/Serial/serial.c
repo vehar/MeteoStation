@@ -1,4 +1,5 @@
 #include "serial.h"
+//TODO: remove this!
 void uart_send_char (USART_TypeDef * USARTx, char dat)
 {  
 	while (!(USARTx->SR & USART_SR_TXE)) {}
