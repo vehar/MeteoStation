@@ -56,11 +56,11 @@ float getAdcVolt()
 uint16_t Spi_Write_Data(uint16_t data)
 {
 	while(!(SPI2->SR & SPI_SR_TXE));//ждём пока опустошится Tx буфер 
-	PIN_OFF(PB_1);//активируем Chip Select
+	PIN_OFF(CS_SOFT);//активируем Chip Select
 	SPI2->DR = data;   //отправляем данные  
 	while(!(SPI2->SR & SPI_SR_RXNE));//ждём пока придёт ответ
 	data = SPI2->DR;  //считываем полученные данные 	 
-	PIN_ON(PB_1);//деактивируем Chip Select 	
+	PIN_ON(CS_SOFT);//деактивируем Chip Select 	
   return data;   //возвращаем то, что прочитали
 }
 

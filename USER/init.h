@@ -3,7 +3,7 @@
 
 #include "macros.h"
 
-//#include "misc.h"
+#include "misc.h"
 #include "stm32f10x.h"
 #include "stm32f10x_rcc.h"
 #include "stm32f10x_adc.h"
@@ -15,32 +15,8 @@
 #include "GLCD.h"
 #include "strings.h"
 
-#define PB_1  B, 1, HIGH, MODE_OUTPUT_PUSH_PULL, SPEED_2MHZ		
+#include "pinmap.h"
 
-#define PB_7  B, 7, HIGH, MODE_OUTPUT_PUSH_PULL, SPEED_2MHZ		
-#define LED1  B, 0, HIGH, MODE_OUTPUT_PUSH_PULL, SPEED_2MHZ	
-#define LED2  B, 1, HIGH, MODE_OUTPUT_PUSH_PULL, SPEED_2MHZ	
-	
-#define USER_KEY_B  B, 2, HIGH, MODE_INPUT_FLOATING, SPEED_2MHZ	
-
-#define PIN_LED					C, 9, HIGH, MODE_OUTPUT_PUSH_PULL, SPEED_2MHZ
-#define PIN_BUTTON				A, 0, HIGH, MODE_INPUT_FLOATING, SPEED_2MHZ
-#define VIBRO_SENSOR_PIN		C, 0, HIGH, MODE_INPUT_FLOATING, SPEED_2MHZ
-#define BOARD_LED  A, 5, HIGH, MODE_OUTPUT_PUSH_PULL, SPEED_2MHZ	
-
-#define MAPPLE_LED  C, 13, HIGH, MODE_OUTPUT_PUSH_PULL, SPEED_2MHZ
-
-#define USART1_TX A, 9,  HIGH, MODE_OUTPUT_PUSH_PULL, SPEED_2MHZ	//MODE_AF_PUSH_PULL
-#define USART1_RX A, 10, HIGH, MODE_INPUT_FLOATING, SPEED_2MHZ
-	
-////////////////////////////////////////////////////////////////////
-
-#define USER_KEY_A  A, 0, HIGH, MODE_INPUT_PULL_UP, SPEED_2MHZ	
-#define POW_1v5_EN  B, 13, HIGH, MODE_OUTPUT_PUSH_PULL, SPEED_2MHZ	
-#define POW_5v0_EN  B, 12, HIGH, MODE_OUTPUT_PUSH_PULL, SPEED_2MHZ	
-#define GSM_ON_OFF  B, 5, HIGH, MODE_OUTPUT_PUSH_PULL, SPEED_2MHZ	
-
-#define RADIO_SET  B, 9, HIGH, MODE_OUTPUT_PUSH_PULL, SPEED_2MHZ	
 
 void Adc_Init();
 void ADC_DMA_init();

@@ -13,6 +13,7 @@
 #include "strings.h"
 #include "dht11.h"
 #include "mesh.h"
+#include "pinmap.h"
 
 #include "EERTOS.h"
 
@@ -20,22 +21,10 @@
 //Gas http://catethysis.ru/stm32-mq135/
 //Preasure http://ziblog.ru/2013/03/15/bmp085-datchik-davleniya.html
 
-
-#define PIN_LED					C, 9, HIGH, MODE_OUTPUT_PUSH_PULL, SPEED_2MHZ
-#define PIN_BUTTON				A, 0, HIGH, MODE_INPUT_FLOATING, SPEED_2MHZ
-#define VIBRO_SENSOR_PIN		C, 0, HIGH, MODE_INPUT_FLOATING, SPEED_2MHZ
-#define BOARD_LED  A, 5, HIGH, MODE_OUTPUT_PUSH_PULL, SPEED_2MHZ	
-#define PB_1  B, 1, HIGH, MODE_OUTPUT_PUSH_PULL, SPEED_2MHZ	
-#define PB_7  B, 7, HIGH, MODE_OUTPUT_PUSH_PULL, SPEED_2MHZ		
-#define LED1  B, 0, HIGH, MODE_OUTPUT_PUSH_PULL, SPEED_2MHZ	
-#define LED2  B, 1, HIGH, MODE_OUTPUT_PUSH_PULL, SPEED_2MHZ	
-
-#define USER_KEY_B  B, 2, HIGH, MODE_INPUT_FLOATING, SPEED_2MHZ	
-
 #define One_Wire_Pin 		GPIOA, GPIO_Pin_15
 
 //////////
-//#define	 CS_LOW 	GPIOB->BSRR = GPIO_BSRR_BR1;
+//#define	CS_LOW 	GPIOB->BSRR = GPIO_BSRR_BR1;
 //#define  CS_HIGH 	GPIOB->BSRR = GPIO_BSRR_BS1;
 
 //Mapple mini

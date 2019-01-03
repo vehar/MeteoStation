@@ -65,20 +65,20 @@ void Spi_Init(void)
     SPI2->CR1 |= SPI_CR1_MSTR;              //Mode Master
     SPI2->CR1 |= SPI_CR1_SPE;               //Enable SPI2
 	
-	//PIN_CONFIGURATION(PB_1);
+	//PIN_CONFIGURATION(CS_SOFT);
 }
 
 void GPIO_Configuration(void)
 {
   GPIO_InitTypeDef GPIO_InitStructure;
 	
-	    RCC->APB2ENR |=
-        RCC_APB2ENR_IOPAEN |
-        RCC_APB2ENR_IOPBEN |
-        RCC_APB2ENR_IOPCEN |
-        RCC_APB2ENR_IOPDEN |
-	    //RCC_APB2ENR_USART1EN |
-		RCC_APB2ENR_AFIOEN;
+	RCC->APB2ENR |=
+	RCC_APB2ENR_IOPAEN |
+	RCC_APB2ENR_IOPBEN |
+	RCC_APB2ENR_IOPCEN |
+	RCC_APB2ENR_IOPDEN |
+	//RCC_APB2ENR_USART1EN |
+	RCC_APB2ENR_AFIOEN;
 	
   RCC_APB2PeriphClockCmd( RCC_APB2Periph_GPIOA , ENABLE); 
   RCC_APB2PeriphClockCmd( RCC_APB2Periph_GPIOB , ENABLE); 	
@@ -119,8 +119,8 @@ PIN_ON(GSM_ON_OFF);
 PIN_CONFIGURATION(RADIO_SET);
 PIN_ON(RADIO_SET);
 
-PIN_CONFIGURATION(USER_KEY_A);
-	if(PIN_SIGNAL(USER_KEY_A) == 0)//Pressed on start
+PIN_CONFIGURATION(USR_BTN);
+	if(PIN_SIGNAL(USR_BTN) == 0)//Pressed on start
 	{
 		verboseOutput = 1;
 	}
