@@ -7,6 +7,15 @@
 #include <stdint.h>
 #include <string.h>
 #include <stdarg.h>
+#include "RingBuffer.h"
+
+#define PMS_UART USART2
+#define PMS_IRQHandler USART2_IRQHandler
+#define PMS_TX_BUFF Pms_TxBuff
+#define PMS_RX_BUFF Pms_RxBuff
+
+extern RingBuffer Pms_TxBuff;
+extern RingBuffer Pms_RxBuff;
 
 /*
 void loop()
@@ -52,6 +61,8 @@ extern  uint16_t 	_checksum;
 extern  uint16_t 	_calculatedChecksum;
 extern  bool pms_data_available; 	
 	
+	void PMS_Config();
+	
   void sleep();
   void wakeUp();
   void activeMode();
@@ -61,6 +72,6 @@ extern  bool pms_data_available;
   bool PMS_read(PMS_DATA* data, uint8_t* msgBuff);
   bool readUntil(PMS_DATA* data, uint16_t timeout);
 
-  bool loop();
+  bool loop(char ch);
   
 #endif //PMS_H_

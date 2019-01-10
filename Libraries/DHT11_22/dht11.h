@@ -25,6 +25,7 @@ DHT22
 
 
 /* Exported functions ------------------------------------------------------- */
+
 uint8_t read_DHT(uint8_t *buf, int sensor);
 int dhtGet(int num, int sensor);
 void dht_process(int sensor);

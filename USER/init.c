@@ -106,7 +106,7 @@ GPIO_InitStructure.GPIO_Pin = GPIO_Pin_13;					    //USER KEY A
   GPIO_Init(GPIOB, &GPIO_InitStructure);*/
 
 	PIN_CONFIGURATION(POW_1v5_EN);
-	//PIN_ON(POW_1v5_EN);
+	PIN_ON(POW_1v5_EN);
 
 	PIN_CONFIGURATION(POW_5v0_EN);
 	PIN_ON(POW_5v0_EN);

@@ -101,14 +101,16 @@ uint16_t read_cycle(uint16_t cur_tics, uint8_t neg_tic, int sensor){
 }
 
 uint16_t Arr[50];
-
 uint16_t dt[42];
 
+
+//Maybe Keil bug here http://www.keil.com/support/docs/3855.htm
+//Need O3 compiller option here!
 uint8_t read_DHT(uint8_t *buf, int sensor){
 	
 	uint16_t cnt;
 	uint8_t i, check_sum; 
-	
+	/*
 	if(sensor == DHT11) {
 			DHT11_SET_OUT;
 			DHT11_LOW;
@@ -174,7 +176,7 @@ uint8_t read_DHT(uint8_t *buf, int sensor){
 		   v = f;
 			 buf[2] = v & 0xFF;
 	}
-	
+	*/
 	return DHT_OK;	
 }
 

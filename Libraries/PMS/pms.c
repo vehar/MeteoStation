@@ -1,4 +1,10 @@
+#include <stm32f10x.h>
 #include "pms.h"
+#include "macros.h"
+#include "pinmap.h"
+
+RingBuffer Pms_RxBuff;
+RingBuffer Pms_TxBuff;
 
   uint8_t 	_status = STATUS_WAITING;
   bool pms_data_available = false; 
@@ -12,6 +18,14 @@
   uint16_t 	_checksum;
   uint16_t 	_calculatedChecksum;	
 
+void PMS_Config()
+{
+	PIN_CONFIGURATION(PMS_Rst);
+	PIN_CONFIGURATION(PMS_Set);
+	PIN_ON(PMS_Rst); //active LOW
+	PIN_ON(PMS_Set);
+	
+}
 
 // Non-blocking function for parse response.
 bool PMS_read(PMS_DATA* data, uint8_t* msgBuff)
@@ -20,16 +34,16 @@ bool PMS_read(PMS_DATA* data, uint8_t* msgBuff)
   _msgBuff = msgBuff;
   bool result = false;
   do{
-	result = loop();
+//	result = loop();
 	}while(result == true);
   
   return _status == STATUS_OK;
 }
 
-bool loop()
+bool loop(char ch)
 {
 	_status = STATUS_WAITING;
-    uint8_t ch = _msgBuff[_index];//_stream->read();
+    //uint8_t ch = _msgBuff[_index];//_stream->read();
 
     switch (_index)
     {
@@ -108,4 +122,28 @@ bool loop()
     }
     _index++;
   return true;
+}
+
+void PMS_IRQHandler(void)
+{
+	char t = 0;
+  if(USART_GetITStatus(PMS_UART, USART_IT_RXNE) != RESET)
+  {
+			t = USART_ReceiveData(PMS_UART);
+			WriteByte(&PMS_RX_BUFF, t);
+			loop(t);
+			//Sim80x_RxCallBack(t);
+  }
+	if(USART_GetITStatus(PMS_UART, USART_IT_TC) != RESET)
+  {
+    USART_ClearITPendingBit(PMS_UART, USART_IT_TC);
+    if(!IsEmpty(&PMS_TX_BUFF))
+		{
+			USART_SendData(PMS_UART,ReadByte(&PMS_TX_BUFF));
+		}
+		else
+		{
+			USART_ITConfig(PMS_UART, USART_IT_TC, DISABLE);
+		}
+  }
 }

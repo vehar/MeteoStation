@@ -44,16 +44,19 @@ int fputc(int ch, FILE *f)
   return(ch);
 }  
 
-PMS_DATA* data;
+//PMS_DATA* data;
 uint8_t pms_msg[20];
 
 DECLARE_TASK(PmsRead)
 {
-  if (PMS_read(data, pms_msg))
+	//PrintBuffer(&Pms_RxBuff);
+	ClearBuf(&Pms_RxBuff);
+ // if (PMS_read(data, pms_msg))
   {
-    printf("PM 1.0 (ug/m3): %i\r\n", data->PM_AE_UG_1_0);
-    printf("PM 2.5 (ug/m3): %i\r\n", data->PM_AE_UG_2_5);
-    printf("PM 10.0 (ug/m3): %i\r\n", data->PM_AE_UG_10_0);
+    printf("PM 1.0 (ug/m3): %u\r\n", _data->PM_AE_UG_1_0);
+    printf("PM 2.5 (ug/m3): %u\r\n", _data->PM_AE_UG_2_5);
+    printf("PM 10.0 (ug/m3): %u\r\n", _data->PM_AE_UG_10_0);
+		
   }
 }
 
@@ -75,6 +78,7 @@ int main(void)
 	Adc_Init();
 	RTC_config();
 	
+	PMS_Config();
 	DEBUGFMSG("Init done");
 	
 	RTOS_timer_init();
@@ -109,6 +113,7 @@ int main(void)
 	SetTimerTaskInfin(T_HeartBit, 0, 1000);
 	SetTimerTaskInfin(GetInternalsParams, 0, 1000);
   SetTimerTaskInfin(RadioBroadcast_T, 0, 4000);
+  SetTimerTaskInfin(PmsRead, 0, 1000);	
 	
 	if(IsMaster)
 	{	
