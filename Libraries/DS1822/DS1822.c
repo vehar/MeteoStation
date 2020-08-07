@@ -40,17 +40,20 @@ unsigned char DS1822_Start_Conversion_by_ROM (GPIO_TypeDef * GPIOx, unsigned lon
 	return One_Wire_Success;
 }
 
+	unsigned char inbuff[DS1822_STRATCHPAD_SIZE];
+
 unsigned char DS1822_Get_Conversion_Result_by_ROM_CRC (GPIO_TypeDef * GPIOx, unsigned long PINx, 
 	unsigned char (*Serial_Num)[DS1822_SERIAL_NUM_SIZE], unsigned int * temp_code)
 {
 	unsigned char cnt;
-	unsigned char inbuff[DS1822_STRATCHPAD_SIZE];
+	//unsigned char inbuff[DS1822_STRATCHPAD_SIZE];
 	cnt=One_Wire_Reset(GPIOx, PINx);
 	if (cnt!=One_Wire_Success) return cnt;
 	One_Wire_Write_Byte(One_Wire_Match_ROM,GPIOx, PINx);
 	for (cnt=0;cnt!=8;cnt++) One_Wire_Write_Byte((*Serial_Num)[cnt],GPIOx, PINx);
 	One_Wire_Write_Byte(DS1822_READ_STRATCHPAD_CMD,GPIOx, PINx);
 	for (cnt=0;cnt!=DS1822_STRATCHPAD_SIZE;cnt++) inbuff[cnt]=One_Wire_Read_Byte(GPIOx, PINx);
+	
 	if (Crc8Dallas(DS1822_STRATCHPAD_SIZE,inbuff)==0) *temp_code = inbuff[0]|(inbuff[1]<<8);
 	else	return One_Wire_CRC_Error;
 	return One_Wire_Success;

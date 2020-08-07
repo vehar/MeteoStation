@@ -110,7 +110,7 @@ uint8_t read_DHT(uint8_t *buf, int sensor){
 	
 	uint16_t cnt;
 	uint8_t i, check_sum; 
-	/*
+	
 	if(sensor == DHT11) {
 			DHT11_SET_OUT;
 			DHT11_LOW;
@@ -176,7 +176,7 @@ uint8_t read_DHT(uint8_t *buf, int sensor){
 		   v = f;
 			 buf[2] = v & 0xFF;
 	}
-	*/
+	 
 	return DHT_OK;	
 }
 

@@ -24,7 +24,7 @@ extern uint8_t verboseOutput;
 
 uint16_t getCO2Level()
 {
- ADC_RegularChannelConfig(ADC1, ADC_Channel_8, 1, ADC_SampleTime_55Cycles5); //External
+ ADC_RegularChannelConfig(ADC1, ADC_Channel_9, 1, ADC_SampleTime_55Cycles5); //External
  ADC_SoftwareStartConvCmd(ADC1, ENABLE);
  while(ADC_GetFlagStatus(ADC1, ADC_FLAG_EOC) == RESET);
  return ADC_GetConversionValue(ADC1);
@@ -134,7 +134,7 @@ DECLARE_TASK(Ds18b20_ReguestTemp)
 DECLARE_TASK(Ds18b20_Hndl)
 {
 	__disable_irq ();
-	memset(DS_Arr, 0xFF, 128);
+	//memset(DS_Arr, 0xFF, 128);
 	/*
 if(verboseOutput)
 {	
@@ -150,6 +150,7 @@ if(verboseOutput)
 	for (uint8_t cnt=0; cnt!=devices_cnt; cnt++)
 	{
 		One_Wire_Error_Handle(DS1822_Get_Conversion_Result_by_ROM_CRC(One_Wire_Pin, &ROM_SN[cnt], &temp[cnt]));
+		//temp[cnt] = One_Wire_Error_Handle(DS1822_Get_Conversion_Result_by_ROM(One_Wire_Pin, &ROM_SN[cnt]));
 		DS18b20_temp =  (temp[cnt]>>4) + (float)((temp[cnt]&0x0F))/10;
 		DS_Arr[cnt] = DS18b20_temp;
 		//printf("DS:%d V:%d.%d \r\n", (cnt+1), (temp[cnt]>>4), (temp[cnt]&0x0F));
@@ -197,7 +198,7 @@ DECLARE_TASK(GetInternalsParams)
 DECLARE_TASK(GasSensor_Hndl)
 {
 	co2 = getCO2Level();
-	
+	sFile.Co2Lvl = co2;
 	//printf("co2:%d \r\n", co2); 
 }	
 

@@ -1,7 +1,7 @@
 #include "..\platform.h"
 #include "macros.h"
 
-#define Time_Pulse_Delay_Low	10
+#define Time_Pulse_Delay_Low	5 //10 if 10 - some sensors can't be discovered TODO!!!
 #define Time_Pulse_Delay_High	60
 #define Time_Reset_Low			480
 #define Time_After_Reset		350

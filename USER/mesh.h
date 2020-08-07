@@ -39,6 +39,7 @@ extern meshPacket mData[16];
 typedef struct {
   struct u_id senderId;
   uint32_t rtcRaw;
+	uint16_t Co2Lvl;
   uint8_t IntTemp;
   uint8_t IntBatt;
 } SensorFile_t;

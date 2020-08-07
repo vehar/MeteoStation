@@ -31,7 +31,7 @@ void loop()
   }
 }
 */
-#define MAKEWORD(a,b)   ((uint16_t)(((uint8_t)(a))|(((uint16_t)((uint8_t)(b)))<<8)))
+#define MAKEWORD(b,a)   ((uint16_t)(((uint8_t)(a))|(((uint16_t)((uint8_t)(b)))<<8)))
 
 typedef struct{
   // Standard Particles, CF=1
@@ -43,18 +43,27 @@ typedef struct{
   uint16_t PM_AE_UG_1_0;
   uint16_t PM_AE_UG_2_5;
   uint16_t PM_AE_UG_10_0;
+	
+	// The number of particles
+  uint16_t PM_NP_UG_0_3;
+  uint16_t PM_NP_UG_0_5;
+	uint16_t PM_NP_UG_1_0;
+	uint16_t PM_NP_UG_2_5;
+	uint16_t PM_NP_UG_5_0;
+	uint16_t PM_NP_UG_10_0;
+	
 }PMS_DATA;
 
 
-  enum STATUS { STATUS_WAITING, STATUS_OK };
+  enum STATUS { STATUS_WAITING, STATUS_OK, STATUS_PROCECCED };
   enum MODE { MODE_ACTIVE, MODE_PASSIVE };  
   
 extern  uint8_t 	_status;
 extern	uint8_t 	_mode;
-extern  uint8_t 	_payload[12];
+extern  uint8_t 	_payload[24];
 extern  uint8_t* 	_msgBuff;
   
-extern  PMS_DATA* 		_data;
+extern  volatile PMS_DATA	_pms;
 extern  uint8_t 	_index;
 extern  uint16_t 	_frameLen;
 extern  uint16_t 	_checksum;

@@ -21,7 +21,9 @@
 //Gas http://catethysis.ru/stm32-mq135/
 //Preasure http://ziblog.ru/2013/03/15/bmp085-datchik-davleniya.html
 
-#define One_Wire_Pin 		GPIOA, GPIO_Pin_15
+//#define One_Wire_Pin 		GPIOA, GPIO_Pin_15
+#define One_Wire_Pin 		GPIOB, GPIO_Pin_6
+
 
 //////////
 //#define	CS_LOW 	GPIOB->BSRR = GPIO_BSRR_BR1;

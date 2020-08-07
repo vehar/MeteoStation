@@ -51,13 +51,41 @@ DECLARE_TASK(PmsRead)
 {
 	//PrintBuffer(&Pms_RxBuff);
 	ClearBuf(&Pms_RxBuff);
- // if (PMS_read(data, pms_msg))
+  if (_status == STATUS_OK)
   {
-    printf("PM 1.0 (ug/m3): %u\r\n", _data->PM_AE_UG_1_0);
-    printf("PM 2.5 (ug/m3): %u\r\n", _data->PM_AE_UG_2_5);
-    printf("PM 10.0 (ug/m3): %u\r\n", _data->PM_AE_UG_10_0);
-		
+    printf("PM 1.0 (ug/m3): %u\r\n", _pms.PM_AE_UG_1_0);
+    printf("PM 2.5 (ug/m3): %u\r\n", _pms.PM_AE_UG_2_5);
+    printf("PM 10.0 (ug/m3): %u\r\n", _pms.PM_AE_UG_10_0);
+		_status = STATUS_PROCECCED;
   }
+}
+/*
+PM_AE_UG_1_0
+PM_AE_UG_2_5
+PM_AE_UG_10_0
+PM_NP_UG_10_0
+*/
+DECLARE_TASK(DataOut_t)
+{
+	//PMS data
+	/*printf("$%d, %d, %d, %d, %d, %d, %d, %d, %d;", 
+	(int)_pms.PM_NP_UG_0_3/20, (int)_pms.PM_NP_UG_1_0/13, (int)_pms.PM_NP_UG_2_5,
+	(int)_pms.PM_NP_UG_5_0*10, (int)_pms.PM_SP_UG_1_0*8, (int)_pms.PM_SP_UG_2_5,
+	(int)_pms.PM_SP_UG_10_0, (int)sFile.IntTemp, (int)sFile.Co2Lvl
+		);	
+	_status = STATUS_PROCECCED;
+	*/
+	
+	//DS18b20 array data
+	/*printf("$%d, %d, %d, %d;", 
+	(int)(DS_Arr[0]*10), (int)(DS_Arr[1]*10), (int)(DS_Arr[2]*10),(int)(DS_Arr[3]*10));	*/
+	
+	printf("$%d, %d, %d, %d, %d, %d, %d, %d, %d;", 
+	(int)_pms.PM_NP_UG_2_5,(int)_pms.PM_NP_UG_5_0*10, (int)_pms.PM_SP_UG_1_0*8, 
+	(int)(DS_Arr[0]*10),(int)(DS_Arr[1]*10), (int)(DS_Arr[2]*10), (int)(DS_Arr[3]*10),
+	(int)sFile.IntTemp, (int)sFile.Co2Lvl
+		);	
+	_status = STATUS_PROCECCED;
 }
 
 //TODO: add stm temperature + calibration
@@ -112,9 +140,15 @@ int main(void)
 												
 	SetTimerTaskInfin(T_HeartBit, 0, 1000);
 	SetTimerTaskInfin(GetInternalsParams, 0, 1000);
-  SetTimerTaskInfin(RadioBroadcast_T, 0, 4000);
-  SetTimerTaskInfin(PmsRead, 0, 1000);	
+	SetTimerTaskInfin(DataOut_t, 0, 1000);
 	
+	SetTimerTaskInfin(GasSensor_Hndl, 0, 100);
+  //SetTimerTaskInfin(RadioBroadcast_T, 0, 4000);
+//  SetTimerTaskInfin(PmsRead, 0, 1000);	
+	
+	SetTimerTaskInfin(Ds18b20_Search, 0, 5000);
+	SetTimerTaskInfin(Ds18b20_ReguestTemp, 0, 2000);
+		
 	if(IsMaster)
 	{	
 //		printf("HOST MAC:%x:%x:%x:%x \r\n", HostID.off0, HostID.off2, HostID.off4, HostID.off8); 	
